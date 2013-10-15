@@ -52,5 +52,11 @@ $config['permission'] = array(
         'add'    => 1,
         'edit'   => 1,
         'delete' => 1
+    ),
+    'template' => array( 
+        'view'   => 3,
+        'add'    => 1,
+        'edit'   => 1,
+        'delete' => 1
     )
 );

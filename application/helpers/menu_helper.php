@@ -12,8 +12,8 @@ function show_menu()
     $menu = array(
         array("title"=>"系統公告",   "url"=>"news","role"=>3),
         array("title"=>"帳號管理", "url"=>"user","role"=>1),
-        array("title"=>"建立評分表", "url"=>"template/create", "role"=>1 ),
-        array("title"=>"檢視評分表", "url"=>"questionarrie/show", "role"=>3),
+        array("title"=>"建立評分表", "url"=>"template/add", "role"=>1 ),
+        array("title"=>"檢視評分表", "url"=>"questionarrie/view", "role"=>3),
         array("title"=>"填寫評分表", "url"=>"questionarrie/update", "role"=>3),
         array("title"=>"分析評分表", "url"=>"questionarrie/analyze", "role"=>1)
     );
@@ -33,3 +33,15 @@ function show_menu()
 
     return $html;
 }
+
+function department_menu( $departments, $menu_name ,$selected_id =NULL ){
+    $html = "<select name='". $menu_name ."'>"; 
+    $html .= "<option value='-1'>-------</option>";
+    foreach( $departments as $department ){
+        $is_selected = "";
+        if( $department->department_id == $selected_id ) {$is_selected ="selected"; }        
+        $html .= "<option value='{$department->department_id}' ". $is_selected . ">{$department->department_name}</option>"; 
+    }
+    $html .= "</select>";
+    return $html ;
+} 

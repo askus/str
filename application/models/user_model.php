@@ -22,6 +22,17 @@ class User_model extends CI_Model
         return $users;
     }
 
+    // get all users by role_id 
+    public function get_users_by_role_id( $role_id ){
+        $this->db->from($this->user_table)
+                 ->join($this->dep_table, "{$this->dep_table}.department_id = {$this->user_table}.department_id")
+                 ->join($this->role_table, "{$this->role_table}.role_id = {$this->user_table}.role_id")
+                 ->where( "{$this->user_table}.role_id", $role_id )
+                 ->order_by('user_id', 'asc');
+        $users = $this->db->get()->result();
+        return $users; 
+    }
+
     public function get_role_list(){
         $roles = $this->db->from($this->role_table)->order_by('role_id', 'desc')->get()->result();
         return $roles; 
