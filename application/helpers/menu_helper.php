@@ -13,7 +13,7 @@ function show_menu()
         array("title"=>"系統公告",   "url"=>"news","role"=>3),
         array("title"=>"帳號管理", "url"=>"user","role"=>1),
         array("title"=>"建立評分表", "url"=>"template/add", "role"=>1 ),
-        array("title"=>"檢視評分表", "url"=>"questionarrie/view", "role"=>3),
+        array("title"=>"檢視評分表", "url"=>"template/index", "role"=>3),
         array("title"=>"填寫評分表", "url"=>"questionarrie/update", "role"=>3),
         array("title"=>"分析評分表", "url"=>"questionarrie/analyze", "role"=>1)
     );

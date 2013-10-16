@@ -12,5 +12,7 @@ class Department_model extends CI_Model
     	$departments = $this->db->get("departments")->result();
         return $departments;
     }
-
+    public function get( $department_id ){
+    	return $this->db->get_where('departments', array("department_id"=> $department_id) )->row();
+    }
 }

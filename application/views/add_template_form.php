@@ -7,13 +7,14 @@
 
 
   <div class="row-fluid">
-    <h3><a href="<?=base_url('user')?>">評分表管理</a> / <?=$action?>評分表</h3>
+    <h3><a href="<?=base_url('template')?>">評分表管理</a> / <?=$action?>評分表</h3>
   </div>
   <form class="form-inline" action="template/ajax_add" method="post">
   <button type="submit" id="add-btn" class="btn btn-primary" data-loading-text="處理中..."> 儲存變更</button>
   <h4>● 基本資料</h4>
     <input name="template[template_id]" type="hidden" value="<?=$template->template_id?>" ></input>
-  	<div>
+  	<input name="template[user_id]" type="hidden" value="<?=$template->user_id?>" ></input>
+    <div>
   	<label class="control-label" for="inputTitle">標題
   		<input id="inputTitle" name="template[title]" type="text"  class="span5" value="<?=(isset($template))?$template->title:'服務稽核評分表' ?>"></input>
 	</label>
