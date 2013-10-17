@@ -14,7 +14,7 @@
   		<h4>
   			<i class="icon-chevron-down"></i>
   			<?= $template->year ?>年<?= $template->month ?>月份<?= $template->title ?> 
-  			<a href=""class="btn btn-mini btn-danger"> <i class="icon-trash icon-white"></i></a>
+  			<a href="<?= base_url('template/delete/'.$template->template_id) ?>" class="btn btn-mini btn-danger"> <i class="icon-trash icon-white"></i></a>
   		</h4>
   		
 

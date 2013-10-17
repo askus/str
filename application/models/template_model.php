@@ -16,23 +16,31 @@ class MY_Question{
         $this->has_comment = $_has_comment;   
     } */
     public $question_id ; 
-	public $question_title;
-	public $question_order;  
-	public $has_score; 
+	public $question_title ;
+	public $question_order ;  
+	public $has_score ; 
 	public $has_comment ;
+    public $template_id ;
+    public $section_id;
 }
 
 class MY_Section{
-	public function __construct( $_section_id , $_section_title, $_section_order ){
+
+	public function __construct( ){
+        $this->questions = array();
+    }
+    /*
+    public function __construct( $_section_id , $_section_title, $_section_order ){
 		$this->section_id = $_section_id;
         $this->section_title = $_section_title;
 		$this->section_order = $_section_order; 
 		$this->questions = array();
-	} 
+	} */
     public $section_id ; 
-	public $questions;
 	public $section_title; 
 	public $section_order; 
+    public $template_id ;
+    public $questions;
 }
 
 class MY_Template{
@@ -58,10 +66,13 @@ class MY_Template{
 class Template_model extends CI_Model
 {
 	public $template_table = "templates";
+
 	public $template_section_table = "template_section";
 	public $section_table = "sections";
-	public $template_question_table ="template_question";
+	public $default_section_table ="default_sections";
+    public $template_question_table ="template_question";
 	public $question_table = "questions";
+    public $default_question_table = "default_questions"; 
     public $questionnaire_table = "questionnaires"; 
 
 	public $sections ;
@@ -81,7 +92,7 @@ class Template_model extends CI_Model
         $this->db->trans_start();
         $this->db->delete( $this->template_table ,array( "template_id"=>$template_id) );
         $this->db->delete( $this->template_section_table, array( "template_id"=>$template_id) );
-        $this->db->delete( $this->template_question_table, array( "template_id"=>$template_id) );=
+        $this->db->delete( $this->template_question_table, array( "template_id"=>$template_id) );
         $this->db->trans_complete();
         
         $this->questionnaire_model->delete_by_template_id( $template_id );
@@ -115,11 +126,11 @@ class Template_model extends CI_Model
         $tmp_section_order2section = array();
         for( $i =0 ; $i < count( $sections_form['section_id'] ) ; $i++){
 
-            $section = new MY_Section(
-                $sections_form['section_id'][$i],
-                $sections_form['section_title'][$i],
-                $sections_form['section_order'][$i] 
-            );
+            $section = new MY_Section(); 
+            $section->section_id = $sections_form['section_id'][$i];
+            $section->section_title = $sections_form['section_title'][$i];
+            $section->section_order = $sections_form['section_order'][$i];  
+            $section->template_id = $template->template_id ;
 
             $template->sections[] = $section ;         
 
@@ -135,6 +146,8 @@ class Template_model extends CI_Model
             $question->question_id = $questions_form['question_id'][$i];
             $question->question_title = $questions_form['question_title'][$i];
             $question->question_order = $questions_form['question_order'][$i];
+            $question->template_id = $template->template_id ; 
+            $question->section_id = $questions_form['section_id'];
             $question->has_score = $has_score_array[$i];
             $question->has_comment = $has_comment_array[$i];
 
@@ -160,11 +173,15 @@ class Template_model extends CI_Model
         $section2question = array(1=>range(1,27 ), 2=>range( 28, 47), 3=>range( 48, 65), 4=> range( 66, 75), 5=> range( 76, 80), 6=> range( 82,82), 7=>range( 83, 83 ), 8=>range( 84,85) );
         $i =0;
         foreach( $section_ids as $section_id ){
-            $section = $this->db->get_where( $this->section_table,array("section_id"=>$section_id ))->row();
+            $section = $this->db->get_where( $this->default_section_table,array("section_id"=>$section_id ))->row();
             //print_r( $section );
 
             //$tmp = new MY_Section( $section->section_id , $section->section_title, $i );
-            $tmp = new MY_Section( NULL , $section->section_title, $i );
+            //$tmp = new MY_Section( NULL , $section->section_title, $i );
+            $tmp = new MY_Section();
+            $tmp->section_title = $section->section_title;
+            $tmp->section_order= $i     ; 
+
             $retTemplateObj->sections[] = $tmp;
             $question_order= 1;
             if( $section_id < 6){
@@ -175,7 +192,7 @@ class Template_model extends CI_Model
                 $question_has_score = false ;                
             }
             foreach( $section2question[ $section_id ] as $question_id ){
-                $question = $this->db->get_where( $this->question_table,  array("question_id"=> $question_id))->row();  
+                $question = $this->db->get_where( $this->default_question_table,  array("question_id"=> $question_id))->row();  
                 
                 $tmp_Question = new MY_Question();
                 $tmp_Question->question_title = $question->question_title ;
@@ -204,6 +221,7 @@ class Template_model extends CI_Model
     }
 
     public function get($template_id ){
+        /*
         $this->db->from($this->template_table)
                  ->join($this->template_section_table, "{$this->template_section_table}.template_id = {$this->template_table}.template_id")
                  ->join($this->section_table, "{$this->section_table}.section_id = {$this->template_section_table}.section_id")
@@ -211,6 +229,13 @@ class Template_model extends CI_Model
 				 ->join($this->question_table,"{$this->question_table}.question_id = {$this->template_question_table}.question_id")
                  ->where("{$this->template_table}.template_id", $template_id )
                  ->order_by('section_order, question_order', 'asc');
+        */
+        $this->db->from($this->template_table)
+                 ->join($this->section_table, "{$this->section_table}.template_id = {$this->template_table}.template_id")
+                 ->join($this->question_table,"{$this->question_table}.template_id = {$this->template_table}.template_id")
+                 ->where("{$this->template_table}.template_id", $template_id )
+                 ->order_by('section_order, question_order', 'asc');
+
         $raw_questions = $this->db->get()->result();
         
         $tmp_template = $this->db->get_where($this->template_table, array( "template_id" => $template_id ) )->row();
@@ -227,29 +252,33 @@ class Template_model extends CI_Model
         $i = 0;
         foreach( $raw_questions as $rq ){
             // questions
-            $question = new MY_Question( $rq->question_title , $rq->question_order, $rq->has_score, $rq->has_comment );
+            $question = new MY_Question();
+            $question->question_title = $rq->question_title ;
+            $question->question_order = $rq->question_order;
+            $question->has_score = $rq->has_score ; 
+            $question->has_comment = $rq->has_comment; 
+            $question->section_id = $rq->section_id ; 
+            $question->template_id = $rq->template_id ;
+
+             //$rq->question_title , $rq->question_order, $rq->has_score, $rq->has_comment );
             
             if( $rq->section_id != $previous_section_id ){
-                $retTemplateObj->sections[] = new MY_Section( $rq->section_id,  $rq->section_title, $rq->section_order );
+                $tmp_section = new MY_Section();
+                $tmp_section->section_id = $rq->section_id ;
+                $tmp_section->section_title = $rq->section_title ;
+                $tmp_section->section_order = $rq->section_order ;
+                $tmp_section->template_id = $rq->template_id ; 
+
+                $retTemplateObj->sections[] = $tmp_section; 
                 $i +=1;
                 $previous_section_id = $rq->section_id; 
             }
             $retTemplateObj->sections[$i]->questions[] = $question; 
-
         }
 
         // questionnaire
         $questionnaires = $this->questionnaire_model->get_by_template_id( $template_id);
         $retTemplateObj->questionnaires = $questionnaires; 
-        /*
-        foreach( $questionnaires  as $questionnaire ){
-            $assigned_user = $this->user_model->get( $questionnaire->assigned_user_id  );
-            $target_department = $this->department_model->get( $questionnaire->target_department_id);
-            $retTemplateObj->labor_division[] = array("assigned_user"=> $assigned_user, "target_department"=> $target_department);
-        }
-        */
-
-        //print_r( $retTemplateObj);
 
         return $retTemplateObj; 
     }
@@ -269,13 +298,12 @@ class Template_model extends CI_Model
         $template->template_id = $template_id; 
         $this->db->trans_complete();
 
-
-        //print_r( $template );
-
         // insert sections 
         foreach( $template->sections as $section  ){
+            $section->template_id = $template->template_id ;
             $section_id = $this->insert_section( $section );
         }
+        /*
         // connect template, section, question   
         foreach( $template->sections as $section ){
             $this->insert_template_section( $template, $section );
@@ -283,6 +311,7 @@ class Template_model extends CI_Model
                 $this->insert_template_question( $template, $section, $question ); 
             }
         }
+        */
 
         // insert labor division 
         $this->questionnaire_model->add_from_template( $template );
@@ -312,7 +341,9 @@ class Template_model extends CI_Model
 
     public function insert_section( $section ){
         $data = array( 
-            "section_title" => $section->section_title 
+            "section_title" => $section->section_title ,
+            "section_order" => $section->section_order,
+            "template_id" => $section->template_id
         );
         // insert section bsaic information 
         $this->db->trans_start();
@@ -324,6 +355,7 @@ class Template_model extends CI_Model
 
         // insert question 
         foreach( $section->questions as $question ){
+            $question->section_id = $section->section_id ;
             $question_id = $this->insert_question( $question );
         }
     }
@@ -331,15 +363,18 @@ class Template_model extends CI_Model
         $data = array(
             "question_title" => $question->question_title, 
             "has_score" => $question->has_score,
-            "has_comment" => $question->has_comment 
+            "has_comment" => $question->has_comment,
+            "section_id" => $question->section_id, 
+            "question_order" => $question->question_order, 
+            "template_id" => $question->template_id 
         );
         // insert question basic information 
         $this->db->trans_start();
         $this->db->insert( $this->question_table, $data );
+        // set back question id
         $question_id = $this->db->insert_id();
         $question->question_id = $question_id ;
         $this->db->trans_complete();
-        // set back question id
 
         return $question->question_id ; 
     }

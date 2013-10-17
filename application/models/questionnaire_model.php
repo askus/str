@@ -9,9 +9,9 @@ class Questionnaire_model extends CI_Model
 		$this->load->model( "user_model");
 		$this->load->model( "department_model");
 	}
-	public function delete_by_template_id( $temlpate_id ){
+	public function delete_by_template_id( $template_id ){
 		$this->db->trans_start();
-		$this->db->delete( "questionnaires", array( "template_id", $template_id));
+		$this->db->delete( "questionnaires", array( "template_id"=> $template_id));
 	    $this->db->trans_complete();
 	}
 

@@ -30,10 +30,12 @@ class Template extends CI_Controller
         $data['departments'] = $this->department_model->get_all_department() ;
     	$this->layout->view('add_template_form', $data);
     }
-    public function ajax_del($template_id){
+    public function delete($template_id) {
+
         check_permission( $this->controller,'delete');
         $this->template_model->delete( $template_id );
-        $this->
+
+        redirect( base_url('template'));
     }
 
     public function ajax_add(){
