@@ -77,6 +77,15 @@ class Template_model extends CI_Model
         $this->load->model('department_model');
     }
 
+    public function delete( $template_id ){
+        $this->db->trans_start();
+        $this->db->delete( $this->template_table ,array( "template_id"=>$template_id) );
+        $this->db->delete( $this->template_section_table, array( "template_id"=>$template_id) );
+        $this->db->delete( $this->template_question_table, array( "template_id"=>$template_id) );=
+        $this->db->trans_complete();
+        
+        $this->questionnaire_model->delete_by_template_id( $template_id );
+    }
 
     public function trans_checkbox_array( $checkbox_array ){
         $ret = array();

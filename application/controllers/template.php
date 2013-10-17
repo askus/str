@@ -14,14 +14,14 @@ class Template extends CI_Controller
         $this->load->model('department_model');
     }
     public function index(){
-       // check_permission($this->controller, 'view');
+        check_permission($this->controller, 'view');
         $data = array();
         $data['templates'] = $this->template_model->get_all();
        // print_r( $data );
         $this->layout->view( 'index_template', $data );
     }
     public function add(){
-        //check_permission($this->controller, 'add');
+        check_permission($this->controller, 'add');
 
     	$data = array();
     	$data['action'] = '建立';
@@ -29,6 +29,11 @@ class Template extends CI_Controller
         $data['template'] = $this->template_model->get_default_template();
         $data['departments'] = $this->department_model->get_all_department() ;
     	$this->layout->view('add_template_form', $data);
+    }
+    public function ajax_del($template_id){
+        check_permission( $this->controller,'delete');
+        $this->template_model->delete( $template_id );
+        $this->
     }
 
     public function ajax_add(){
@@ -50,7 +55,7 @@ class Template extends CI_Controller
             $this->template_model->update_template( $template );
         }
 
-        echo "{ 'status': true, 'errMsg': '' }";
+        echo '{ "status": "ok", "errMsg": "" }';
 
         //
         /*

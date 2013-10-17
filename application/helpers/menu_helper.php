@@ -34,8 +34,8 @@ function show_menu()
     return $html;
 }
 
-function department_menu( $departments, $menu_name ,$selected_id =NULL ){
-    $html = "<select name='". $menu_name ."'>"; 
+function department_menu( $departments, $menu_name , $menu_class , $selected_id =NULL ){
+    $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
     $html .= "<option value='-1'>-------</option>";
     foreach( $departments as $department ){
         $is_selected = "";
