@@ -34,6 +34,12 @@ function show_menu()
     return $html;
 }
 
+function status_menu( $status ){
+    $string_map = array( 0=>'<p class="text-error">未填寫</p>', 1=>'<p class="text-warning">填寫中</p>', 2=>'<p class="text-success">已填寫</p>' );
+    return $string_map[ $status ];
+    //return $html ;
+}
+
 function department_menu( $departments, $menu_name , $menu_class , $selected_id =NULL ){
     $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
     $html .= "<option value='-1'>-------</option>";

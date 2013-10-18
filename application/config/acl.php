@@ -58,5 +58,11 @@ $config['permission'] = array(
         'add'    => 1,
         'edit'   => 1,
         'delete' => 1
+    ),
+    'questionnaire' => array(
+        'view'   => 3,
+        'add'    => 1,
+        'edit'   => 3,
+        'delete' => 1
     )
 );

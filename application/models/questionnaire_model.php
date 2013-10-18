@@ -2,6 +2,12 @@
 
 class Questionnaire_model extends CI_Model
 {
+/*
+	status: 0-> incomplete, 1-> processed, 2-> complete
+*/
+	public $STATUS_INCOMPLETE= 0;
+	public $STATUS_PROCESSED = 1;
+	public $STATUS_COMPLETE = 2; 
 
 	public function __construct()
     {
@@ -10,20 +16,51 @@ class Questionnaire_model extends CI_Model
 		$this->load->model( "department_model");
 	}
 	public function delete_by_template_id( $template_id ){
+		$questionnaires = $this->get_by_template_id( $template_id );
+
+
+		//delete questionnaire_score
+		foreach( $questionnaires as $questionnaire ){
+			$this->db->delete("questionnaire_score", array( "questionnaire_id"=> $questionnaire->questionnaire_id  ));
+		}
+
+
 		$this->db->trans_start();
 		$this->db->delete( "questionnaires", array( "template_id"=> $template_id));
 	    $this->db->trans_complete();
+	
+
 	}
 
+	//create by new template 
 	public function add_from_template( $template ){
 		foreach( $template->labor_division as $labor_division ){
 			$assined_user_id = $labor_division['assigned_user_id'];
 			$target_department_id = $labor_division['target_department_id'];
-			$this->add( $template->template_id, $assined_user_id, $target_department_id, date("Y-m-d H:i:s") ,"");
+			$questionnaire_id = $this->add( 0 , $template->template_id, $assined_user_id, $target_department_id, date("Y-m-d H:i:s") ,"");
+		
+			//initialize questionnaire_score for this 
+			foreach( $template->sections as $section  ){
+				foreach( $section->questions as $question ){
+					$this->add_questionnaire_score( $questionnaire_id, $question->question_id );
+				}
+			}
 		}
 	}
-	public function add( $template_id, $assined_user_id, $target_department_id, $date, $executor ){
+	// initialize questionnaire_score 
+	public function add_questionnaire_score( $questionnaire_id, $question_id , $score=0, $comment=""){
+		$data = array( "questionnaire_id" => $questionnaire_id,
+						 "question_id" => $question_id,
+						 "score" => $score,
+						 "comment" => $comment  );
+		$this->db->insert("questionnaire_score", $data );
+	}
+
+	//public function add_score( $question) 
+
+	public function add( $status,  $template_id, $assined_user_id, $target_department_id, $date, $executor ){
 		$data = array(
+			'status' => $status, 
 			'template_id' => $template_id,
 			'assigned_user_id' => $assined_user_id,
 			'target_department_id' => $target_department_id,
@@ -31,6 +68,8 @@ class Questionnaire_model extends CI_Model
 			'executor' => $executor 
 		);
 		$this->db->insert( 'questionnaires', $data ); 
+		$questionnaire_id = $this->db->insert_id();
+		return $questionnaire_id;
 	}
 	public function get_by_template_id( $template_id ){
 		$query = $this->db->get_where( "questionnaires", array( "template_id"=>$template_id ) );
@@ -48,5 +87,29 @@ class Questionnaire_model extends CI_Model
 		$ret->assigned_user = $this->user_model->get( $ret->assigned_user_id );
 		$ret->target_department = $this->department_model->get( $ret->target_department_id );
 		return $ret;
+	}
+	public function get_with_question_score( $questionnaire_id){
+		$ret_questionnaire = $this->get( $questionnaire_id);
+		//print_r( $ret_questionnaire );
+
+		$sections = $this->db->from( "sections")
+							->where( "template_id" , $ret_questionnaire->template_id  )
+							->order_by("sections.section_order")
+							->get()->result();
+		$ret_questionnaire->sections = $sections ; 
+		// add questions
+		foreach( $ret_questionnaire->sections as $section ){
+			$questions = $this->db->from( "questions" )
+									->where( "template_id",  $ret_questionnaire->template_id )
+									->where( "section_id", $section->section_id )
+									->order_by("questions.question_order")
+									->get()->result();
+			$section->questions = $questions;
+			foreach( $section->questions as $question ){
+				$question_score = $this->db->get_where( "questionnaire_score", array( "questionnaire_id"=> $questionnaire_id, "question_id"=> $question->question_id  ))->row();
+				$question->score = $question_score ;
+			}
+		}
+		return $ret_questionnaire;
 	}
 }

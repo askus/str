@@ -74,6 +74,7 @@ class Template_model extends CI_Model
 	public $question_table = "questions";
     public $default_question_table = "default_questions"; 
     public $questionnaire_table = "questionnaires"; 
+    public $questionnaire_score_table = "questionnaire_score" ; 
 
 	public $sections ;
 	public $year;
@@ -91,11 +92,12 @@ class Template_model extends CI_Model
     public function delete( $template_id ){
         $this->db->trans_start();
         $this->db->delete( $this->template_table ,array( "template_id"=>$template_id) );
-        $this->db->delete( $this->template_section_table, array( "template_id"=>$template_id) );
-        $this->db->delete( $this->template_question_table, array( "template_id"=>$template_id) );
+        $this->db->delete( $this->question_table, array( "template_id"=>$template_id) );
+        $this->db->delete( $this->section_table, array( "template_id"=>$template_id) );
         $this->db->trans_complete();
-        
+        // delete questionarry 
         $this->questionnaire_model->delete_by_template_id( $template_id );
+        return true ;
     }
 
     public function trans_checkbox_array( $checkbox_array ){
@@ -355,6 +357,7 @@ class Template_model extends CI_Model
 
         // insert question 
         foreach( $section->questions as $question ){
+            $question->template_id = $section->template_id ; 
             $question->section_id = $section->section_id ;
             $question_id = $this->insert_question( $question );
         }
