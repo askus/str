@@ -87,6 +87,8 @@ class Template_model extends CI_Model
         $this->load->model('questionnaire_model');
         $this->load->model('user_model');
         $this->load->model('department_model');
+
+        $this->load->helper('form');
     }
 
     public function delete( $template_id ){
@@ -100,19 +102,6 @@ class Template_model extends CI_Model
         return true ;
     }
 
-    public function trans_checkbox_array( $checkbox_array ){
-        $ret = array();
-        $to_add = false;
-        for( $i= 0 ; $i< count( $checkbox_array); $i++){
-            if( $checkbox_array[$i] == 1){
-                $to_add = true;
-            }else{
-                $ret[] = $to_add;
-                $to_add = false;
-            }
-        }
-        return $ret ; 
-    }
 
     public function form2template( $template_form , $sections_form, $questions_form, $labor_division_form ){
         

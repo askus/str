@@ -12,6 +12,19 @@ class Questionnaire extends CI_Controller
     	$this->load->model('questionnaire_model');
     	$this->load->model('template_model');
     }
+    public function _update( $questionnaire  ){
+        check_permission($this->controller, 'edit');
+
+    }
+    public function temp_save(){
+        $questionnaire_form = $this->input->post('questionnaire', true);
+        $questionnaire_score_form = $this->input->post('questionnaire_score', ture);
+    }
+    public function complete(){
+        $questionnaire_form = $this->input->post('questionnaire', true);
+        $questionnaire_score_form = $this->input->post('questionnaire_score', ture);
+    }
+
     public function edit( $questionnaire_id ){
     	check_permission($this->controller, 'edit');
     	// check is the assinged user 
@@ -21,7 +34,8 @@ class Questionnaire extends CI_Controller
 		// if login_user == administrator or the assigned user   
     	if( $questionnaire->assigned_user->user_id == $login_user_id || ( $login_user_role_id == 1 ) ){
     		$data['questionnaire'] = $questionnaire;
-    		$this->layout->view( 'edit_questionnaire', $data );
+    		$data['last_modified_user_id'] = $login_user_id;
+            $this->layout->view( 'edit_questionnaire', $data );
     	}else{
     		redirect( base_url("questionnaire") );
     	}

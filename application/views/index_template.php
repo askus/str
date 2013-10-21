@@ -19,12 +19,14 @@
   		
   		<ul>
   		<table class="table">
-  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">被稽核單位</th><th class="span4"></th></tr>
+  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">被稽核單位</th><th>最近更新時間</th><th>修改人</th><th class="span4"></th></tr>
   		<?php foreach( $template->questionnaires as $questionnaire ): ?>
   			<tr>
   				<td> <?= status_menu( $questionnaire->status ) ?></td>
   				<td> <?= $questionnaire->assigned_user->name ?> </td>
   				<td> <?= $questionnaire->target_department->department_name ?></td>
+          <td> <?php if( !is_null($questionnaire->last_modified_datetime) ): ?> <?= $questionnaire->last_modified_datetime ?> <?php endif;?> </td>
+          <td><?php if( !is_null( $questionnaire->last_modified_user ) ):  ?> <?= $questionnaire->last_modified_user->name ?> <?php endif;?> </td>
   				<td> <a href="#" class="btn btn-mini btn-info">檢視</a> <a href="<?= base_url('questionnaire/edit' ) ?>/<?= $questionnaire->questionnaire_id ?>" class="btn btn-mini btn-info btn-edit">編輯</a> <a class="btn btn-mini btn-danger btn-del" >刪除</a> </td>	
  			</tr>	
   		<?php endforeach; ?>
