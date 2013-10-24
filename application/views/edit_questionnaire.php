@@ -42,7 +42,7 @@
                 <tr>
                   <input type="hidden" name="questionnaire_score[question_id][]" value="<?= $question->question_id?>"></input>
                  
-                  <td class="span1"><input row='<?= $i ?>' class="is_null_checkbox" type="checkbox" name="questionnaire_score[is_null][]" <?php if($question->score->is_null): ?> checkbox<?php endif;?> ></input></td>
+                  <td class="span1"><input row='<?= $i ?>' class="is_null_checkbox" type="checkbox" name="questionnaire_score[is_null][]" <?php if( !$question->score->is_null): ?> checked<?php endif;?> ></input></td>
                   <td class="span7"><p id='row-<?= $i ?>-question'><?= $question->question_title?></p></td>
                   <td class="span1"><?php if( $question->has_score): ?><input id="row-<?= $i ?>-score" type="text" class="span1" name="questionnaire_score[score][]" value="<?= $question->score->score ?>" readonly></input><?php endif; ?>  </td>
                   <td class="span4"><?php if( $question->has_comment): ?><textarea id="row-<?= $i ?>-comment" type="text" class="span4" rows="3" name="questionnaire_score[comment][]" value="<?= $question->score->comment?>" readonly></textarea> <?php endif; ?></td>
