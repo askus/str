@@ -21,13 +21,12 @@ class Questionnaire_model extends CI_Model
 
 		//delete questionnaire_score
 		foreach( $questionnaires as $questionnaire ){
-			$this->db->delete("questionnaire_score", array( "questionnaire_id"=> $questionnaire->questionnaire_id  ));
+			$this->delete( $questionnaire->questionnaire_id );
+			//$this->db->delete("questionnaire_score", array( "questionnaire_id"=> $questionnaire->questionnaire_id  ));
 		}
-
-
-		$this->db->trans_start();
-		$this->db->delete( "questionnaires", array( "template_id"=> $template_id));
-	    $this->db->trans_complete();
+		//$this->db->trans_start();
+		//$this->db->delete( "questionnaires", array( "template_id"=> $template_id));
+	    //$this->db->trans_complete();
 	}
 	public function form2questionnaire( $questionnaire_form, $questionnaire_score_form ){
 		/**!!!!!!!**/
@@ -40,7 +39,6 @@ class Questionnaire_model extends CI_Model
 		$questionnaire->last_modified_user_id = $questionnaire_form['last_modified_user_id'];
 		$questionnaire->executor = $questionnaire_form['executor'];
 
-
 		// build tmp mapping from question_id2question 
 		$question_id2question = array();
 		foreach( $questionnaire->sections  as $section ){
@@ -49,19 +47,29 @@ class Questionnaire_model extends CI_Model
 			}
 		}
 
-		$questionnaire_score_is_null_array = trans_checkbox_array( $questionnaire_score_form['is_null']);
+		//$questionnaire_score_is_not_null_array = trans_checkbox_array( $questionnaire_score_form['is_not_null']);
 
 		// update questionnaire_score 
-		for( $i=0; $i < count( $questionnaire_score_is_null_array ); $i++ ){
-			$is_null = $questionnaire_score_is_null_array[$i];
+		for( $i=0; $i < count( $questionnaire_score_form['true_false_null'] ); $i++ ){
+			$true_false_null = $questionnaire_score_form['true_false_null'][$i];
+			if( $true_false_null <0 ){
+				$is_null= true;
+			}else if( $true_false_null == 0 ){
+				$is_null= false; 
+				$score = 0;
+			}else if( $true_false_null == 1 ){
+				$is_null = false;
+				$score = 1;
+			}
+			//$is_null = !$questionnaire_score_is_not_null_array[$i];
 			$question_id = $questionnaire_score_form['question_id'][$i];
-			$score = $questionnaire_score_form['score'][$i];
+			//$score = $questionnaire_score_form['score'][$i];
 			$comment = $questionnaire_score_form['comment'][$i];
 
 			$question = $question_id2question[ $question_id ] ;
-			$question->is_null = $is_null;
-			$question->score = $score; 
-			$question->comment = $comment ;  
+			$question->score->is_null = $is_null;
+			$question->score->score = $score; 
+			$question->score->comment = $comment ;  
 		} 
 
 		return $questionnaire; 
@@ -77,7 +85,11 @@ class Questionnaire_model extends CI_Model
 			//initialize questionnaire_score for this 
 			foreach( $template->sections as $section  ){
 				foreach( $section->questions as $question ){
-					$this->add_questionnaire_score( $questionnaire_id, $question->question_id );
+					if( !$section->is_all_comment ){
+						$this->add_questionnaire_score( $questionnaire_id, $question->question_id );
+					}else{
+						$this->add_questionnaire_score( $questionnaire_id, $question->question_id, null, "", false);
+					}
 				}
 			}
 		}
@@ -85,19 +97,22 @@ class Questionnaire_model extends CI_Model
 
 
 	public function update_questionnaire_score( $questionnaire_score ){
+
+
 		$data = array( 'is_null' => $questionnaire_score->is_null,
 						'comment' => $questionnaire_score->comment,
 						'score' => $questionnaire_score->score  );
 
 		//update 
-		$this->db->update('questionnaire_score', $data )
-				 ->where('questionnaire_id', $questionnaire_score->questionnaire_id )
-				 ->where('question_id', $questionnaire_score->question_id);
+		$this->db->update('questionnaire_score', $data , 
+			array( 'questionnaire_id'=> $questionnaire_score->questionnaire_id,
+			 "question_id"=> $questionnaire_score->question_id )
+		);
+
 	}
 
 	// update questionnaire 
 	public function update( $questionnaire ){
-		
 		$data = array( 
 					'template_id'=> $questionnaire->template_id,
 					'date' => $questionnaire->date,
@@ -108,22 +123,24 @@ class Questionnaire_model extends CI_Model
 					'last_modified_datetime' => $questionnaire->last_modified_datetime,
 					'last_modified_user_id' => $questionnaire->last_modified_user_id 
 				);
-		$this->db->update('questionnaire', $data)->where('questionnaire_id', $questionnaire->questionnaire_id );
+		$this->db->update('questionnaires', $data, array('questionnaire_id' => $questionnaire->questionnaire_id)  );
 
 		// update questionnaire score
 		foreach( $questionnaire->sections as $section ){
 			foreach( $section->questions as $question ){
+
 				$this->update_questionnaire_score( $question->score );
 			}
 		}
 	}
 
 	// initialize questionnaire_score 
-	public function add_questionnaire_score( $questionnaire_id, $question_id , $score=null, $comment=""){
+	public function add_questionnaire_score( $questionnaire_id, $question_id , $score=null, $comment="",$is_null= true ){
 		$data = array( "questionnaire_id" => $questionnaire_id,
 						 "question_id" => $question_id,
 						 "score" => $score,
-						 "comment" => $comment  );
+						 "comment" => $comment ,
+						 "is_null" => $is_null );
 		$this->db->insert("questionnaire_score", $data );
 	}
 
@@ -157,7 +174,6 @@ class Questionnaire_model extends CI_Model
 	public function get( $questionnaire_id ){
 		$query = $this->db->get_where( "questionnaires", array("questionnaire_id"=> $questionnaire_id ));
 		$ret = $query->row();
-
 		$ret->assigned_user = $this->user_model->get( $ret->assigned_user_id );
 		if( !is_null( $ret->last_modified_user_id)  ){
 			$ret->last_modified_user = $this->user_model->get( $ret->last_modified_user_id );
@@ -176,7 +192,7 @@ class Questionnaire_model extends CI_Model
 	}
 	public function get_with_question_score( $questionnaire_id){
 		$ret_questionnaire = $this->get( $questionnaire_id);
-		//print_r( $ret_questionnaire );
+
 
 		$sections = $this->db->from( "sections")
 							->where( "template_id" , $ret_questionnaire->template_id  )
@@ -197,5 +213,19 @@ class Questionnaire_model extends CI_Model
 			}
 		}
 		return $ret_questionnaire;
+	}
+	public function get_by_user_id( $user_id ){
+		$tmp_questionnaires = $this->db->get_where("questionnaires", array("assigned_user_id"=>$user_id))->result(); 
+		$ret_questionnaires = array();
+		foreach( $tmp_questionnaires as $tmp_questionnaire ){
+			$ret_questionnaires[] = $this->get_with_question_score( $tmp_questionnaire->questionnaire_id );
+		}
+		return $ret_questionnaires;
+	}
+
+	public function delete( $questionnaire_id){
+		
+		$this->db->delete('questionnaires', array('questionnaire_id' => $questionnaire_id ));
+        $this->db->delete('questionnaire_score', array('questionnaire_id'=>$questionnaire_id));
 	}
 }

@@ -56,7 +56,7 @@
         <input type="hidden" name="sections[section_id][]" value="<?= $section->section_id ?>">
         <input type="hidden" name="sections[section_title][]" value="<?= $section->section_title ?>">
         <input type="hidden" name="sections[section_order][]" value="<?= $section->section_order ?>">
-
+        <input type="hidden" name="sections[is_all_comment][]" value="<?= $section->is_all_comment ?>">
         <li><strong><?= $section->section_title ?></strong></li>
         <table class="table">
         <tr><th>順序</th><th>內容</th><th>評分</th><th>評語</th></tr>

@@ -41,6 +41,7 @@ class MY_Section{
 	public $section_order; 
     public $template_id ;
     public $questions;
+    public $is_all_comment;
 }
 
 class MY_Template{
@@ -92,13 +93,15 @@ class Template_model extends CI_Model
     }
 
     public function delete( $template_id ){
+        // delete questionarry 
+        $this->questionnaire_model->delete_by_template_id( $template_id );
+
         $this->db->trans_start();
         $this->db->delete( $this->template_table ,array( "template_id"=>$template_id) );
         $this->db->delete( $this->question_table, array( "template_id"=>$template_id) );
         $this->db->delete( $this->section_table, array( "template_id"=>$template_id) );
         $this->db->trans_complete();
-        // delete questionarry 
-        $this->questionnaire_model->delete_by_template_id( $template_id );
+
         return true ;
     }
 
@@ -121,6 +124,7 @@ class Template_model extends CI_Model
             $section->section_id = $sections_form['section_id'][$i];
             $section->section_title = $sections_form['section_title'][$i];
             $section->section_order = $sections_form['section_order'][$i];  
+            $section->is_all_comment = $sections_form['is_all_comment'][$i];
             $section->template_id = $template->template_id ;
 
             $template->sections[] = $section ;         
@@ -130,8 +134,8 @@ class Template_model extends CI_Model
 
         // questions 
         for( $i = 0 ; $i < count( $questions_form['question_id'] ); $i++){
-            $has_score_array = $this->trans_checkbox_array( $questions_form['has_score']) ; 
-            $has_comment_array = $this->trans_checkbox_array( $questions_form['has_comment'] ) ;
+            $has_score_array = trans_checkbox_array( $questions_form['has_score']) ; 
+            $has_comment_array = trans_checkbox_array( $questions_form['has_comment'] ) ;
 
             $question = new MY_Question();
             $question->question_id = $questions_form['question_id'][$i];
@@ -173,15 +177,18 @@ class Template_model extends CI_Model
             $tmp->section_title = $section->section_title;
             $tmp->section_order= $i     ; 
 
-            $retTemplateObj->sections[] = $tmp;
             $question_order= 1;
             if( $section_id < 6){
                 $question_has_comment= true;
                 $question_has_score = true ;
+                $tmp->is_all_comment = false;
             }else{
                 $question_has_comment= true;
-                $question_has_score = false ;                
+                $question_has_score = false ;
+                $tmp->is_all_comment = true;                
             }
+            $retTemplateObj->sections[] = $tmp;
+
             foreach( $section2question[ $section_id ] as $question_id ){
                 $question = $this->db->get_where( $this->default_question_table,  array("question_id"=> $question_id))->row();  
                 
@@ -334,7 +341,8 @@ class Template_model extends CI_Model
         $data = array( 
             "section_title" => $section->section_title ,
             "section_order" => $section->section_order,
-            "template_id" => $section->template_id
+            "template_id" => $section->template_id,
+            "is_all_comment" => $section->is_all_comment
         );
         // insert section bsaic information 
         $this->db->trans_start();

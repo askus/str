@@ -1,5 +1,19 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+function user_menu( $users, $menu_name, $menu_class, $selected_id= NULL ){
+
+    $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
+    $html .= "<option value='-1'>-------</option>";
+    foreach( $users as $user ){
+        $is_selected = "";
+        if( $user->user_id == $user_id ) {$is_selected ="selected"; }        
+        $html .= "<option value='{$user->user_id}' ". $is_selected . ">{$user->user_name}</option>"; 
+    }
+    $html .= "</select>";
+    return $html ;
+}
+
+
 /* 顯示選單列 */
 function show_menu()
 {
@@ -13,9 +27,9 @@ function show_menu()
         array("title"=>"系統公告",   "url"=>"news","role"=>3),
         array("title"=>"帳號管理", "url"=>"user","role"=>1),
         array("title"=>"建立評分表", "url"=>"template/add", "role"=>1 ),
-        array("title"=>"檢視評分表", "url"=>"template/index", "role"=>3),
-        array("title"=>"填寫評分表", "url"=>"questionarrie/update", "role"=>3),
-        array("title"=>"分析評分表", "url"=>"questionarrie/analyze", "role"=>1)
+        array("title"=>"檢視評分表", "url"=>"template/index", "role"=>1),
+        array("title"=>"我的評分表", "url"=>"questionnaire/index", "role"=>3),
+        array("title"=>"分析評分表", "url"=>"questionnaire/analyze", "role"=>1)
     );
 
     // 建構選單 HTML
@@ -32,6 +46,34 @@ function show_menu()
     $html .= '</ul>';
 
     return $html;
+}
+
+function true_false_null( $select_name ,  $questionnaire_score, $row = null ){    
+    // determine selected option 
+    if( $questionnaire_score->is_null ){
+        $selected_option = 0; // 0 = NULL
+    }else if( $questionnaire_score->score == 1 ){
+        $selected_option = 1; // 1 = O
+    }else if( $questionnaire_score->score == 0 ){
+        $selected_option = 2; // 2 = X
+    }
+
+    $option2values = array( array("-", -1), array("o",1), array( "x", 0 ));
+    $html =  '<select data-row="'.$row.'" class="span1 true_false_null" name="'. $select_name .'">';
+
+    for( $i = 0 ; $i < 3 ; $i++ ){
+        if( $selected_option == $i ){ $is_selected = "selected";}else{ $is_selected = "";}
+        $html .= ( '<option value="'.$option2values[$i][1].'" '.$is_selected.'>'.$option2values[$i][0].'</option>' );
+    }
+    $html .= '</select>';
+
+    return $html;
+} 
+function score2symbol( $raw_score ){   
+    $mapping= array( );
+    $mapping[0] ='x';
+    $mapping[1] = 'o';
+    return $mapping[$raw_score]; 
 }
 
 function status_menu( $status ){

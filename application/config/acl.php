@@ -54,7 +54,7 @@ $config['permission'] = array(
         'delete' => 1
     ),
     'template' => array( 
-        'view'   => 3,
+        'view'   => 1,
         'add'    => 1,
         'edit'   => 1,
         'delete' => 1

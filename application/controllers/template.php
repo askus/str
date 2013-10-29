@@ -17,7 +17,6 @@ class Template extends CI_Controller
         check_permission($this->controller, 'view');
         $data = array();
         $data['templates'] = $this->template_model->get_all();
-       // print_r( $data );
         $this->layout->view( 'index_template', $data );
     }
     public function add(){
