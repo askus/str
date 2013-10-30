@@ -15,6 +15,7 @@ class Questionnaire_model extends CI_Model
 		$this->load->model( "user_model");
 		$this->load->model( "department_model");
 		$this->load->helper( 'form');
+
 	}
 	public function delete_by_template_id( $template_id ){
 		$questionnaires = $this->get_by_template_id( $template_id );
@@ -75,11 +76,35 @@ class Questionnaire_model extends CI_Model
 		return $questionnaire; 
 	}
 
+	// create new questionnaire by 
+	public function add_by_labor_division( $template_id, $assigned_user_id, $target_department_id ){
+		$questionnaire_id = $this->add( 0, $template_id, $assigned_user_id, $target_department_id, date("Y-m-d H:i:s", now()) ,"", date("Y-m-d H:i:s", now()), null);
+		
+		$this->load->model("template_model");
+		$template = $this->template_model->get( $template_id );
+
+		foreach( $template->sections as $section ){
+			//print_r( $section);
+			//echo "<br><br>";
+			foreach( $section->questions as $question ){
+
+				if( !$section->is_all_comment ){
+					$this->add_questionnaire_score( $questionnaire_id, $question->question_id );
+				}else{
+					$this->add_questionnaire_score( $questionnaire_id, $question->question_id, null, "", false);
+				}
+			}
+		} 
+	}
+
 	//create by new template 
 	public function add_from_template( $template ){
 		foreach( $template->labor_division as $labor_division ){
 			$assined_user_id = $labor_division['assigned_user_id'];
 			$target_department_id = $labor_division['target_department_id'];
+			
+			$this->add_by_labor_division( $template->template_id, $assined_user_id, $target_department_id );
+/*
 			$questionnaire_id = $this->add( 0 , $template->template_id, $assined_user_id, $target_department_id, date("Y-m-d H:i:s") ,"", date("Y-m-d H:i:s", time()), null);
 		
 			//initialize questionnaire_score for this 
@@ -92,6 +117,7 @@ class Questionnaire_model extends CI_Model
 					}
 				}
 			}
+*/
 		}
 	}
 

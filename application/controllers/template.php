@@ -12,11 +12,20 @@ class Template extends CI_Controller
         $this->load->model('template_model');
         $this->load->model('user_model');
         $this->load->model('department_model');
+        $this->load->helper('menu_helper');
     }
-    public function index(){
+    public function index( ){
         check_permission($this->controller, 'view');
         $data = array();
+        $users = $this->user_model->get_users_by_role_id(2);
+        $departments = $this->user_model->get_department_list();
+
+        $selected_template_id= $this->input->get("tid");
+
+        $data['selected_template_id']=$selected_template_id;
         $data['templates'] = $this->template_model->get_all();
+        $data['users'] = $users;
+        $data['departments'] = $departments;
         $this->layout->view( 'index_template', $data );
     }
     public function add(){

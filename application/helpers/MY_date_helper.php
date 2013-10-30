@@ -1,5 +1,7 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+ date_default_timezone_set("Asia/Taipei");
+
 /* 西元日期轉民國日期 */
 function date_to_chinese($date)
 {

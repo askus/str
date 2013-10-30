@@ -22,9 +22,13 @@ class Questionnaire extends CI_Controller
     }
     public function ajax_add(){
         check_permission( $this->controller, 'add');
+        $template_id = $this->input->post("template_id", true);
+        $assigned_user_id = $this->input->post("assigned_user_id", true);
+        $target_department_id = $this->input->post("target_department_id", true);
 
+        $this->questionnaire_model->add_by_labor_division(  $template_id, $assigned_user_id, $target_department_id );
         
-
+        echo '{ "status":"ok","errMsg":[] }';
     }
 
     public function ajax_delete( ){
@@ -57,6 +61,8 @@ class Questionnaire extends CI_Controller
         $questionnaire_score_form = $this->input->post('questionnaire_score', true);
     
         $questionnaire = $this->questionnaire_model->form2questionnaire( $questionnaire_form, $questionnaire_score_form);
+        // set now date 
+        $questionnaire->last_modified_datetime = date("Y-m-d H:i:s");
         //set the status into complete
         $questionnaire->status = $this->questionnaire_model->STATUS_COMPLETE;
         $this->questionnaire_model->update( $questionnaire );
@@ -76,6 +82,9 @@ class Questionnaire extends CI_Controller
         $questionnaire_score_form = $this->input->post('questionnaire_score', true);
     
         $questionnaire = $this->questionnaire_model->form2questionnaire( $questionnaire_form, $questionnaire_score_form);
+        // set now date 
+        $questionnaire->last_modified_datetime = date("Y-m-d H:i:s");
+
         //set the status into processed
         $questionnaire->status = $this->questionnaire_model->STATUS_PROCESSED;
 

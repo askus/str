@@ -1,18 +1,47 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-function user_menu( $users, $menu_name, $menu_class, $selected_id= NULL ){
+function user_menu( $users, $menu_name, $menu_class, $menu_id, $selected_id= NULL ){
 
-    $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
+    $html = "<select class='{$menu_class}' name='". $menu_name ."' id='${menu_id}'>"; 
     $html .= "<option value='-1'>-------</option>";
     foreach( $users as $user ){
         $is_selected = "";
-        if( $user->user_id == $user_id ) {$is_selected ="selected"; }        
-        $html .= "<option value='{$user->user_id}' ". $is_selected . ">{$user->user_name}</option>"; 
+        if( $user->user_id == $selected_id ) {$is_selected ="selected"; }        
+        $html .= "<option value='{$user->user_id}' ". $is_selected . ">{$user->name}</option>"; 
     }
     $html .= "</select>";
     return $html ;
 }
 
+function cal_process( $template ){
+    $tmp_records = array();
+    $tmp_records[0] = 0;
+    $tmp_records[1] = 0;
+    $tmp_records[2] = 0;
+    foreach( $template->questionnaires as $questionnaire ){
+        $tmp_records[ $questionnaire->status ] += 1;
+    }
+    $total = count( $template->questionnaires );
+
+    $tmp_records[0] /= $total;//未填寫
+    $tmp_records[1] /= $total;//填寫中
+    $tmp_records[2] /= $total;//已填寫
+
+    $tmp_records[0] *= 100;
+    $tmp_records[1] *= 100;
+    $tmp_records[2] *= 100;
+    return $tmp_records;
+}
+
+function show_template_completenness( $template ){
+    $tmp_records=cal_process( $template );
+    return sprintf("完成度:%.0f%%", $tmp_records[2] ); 
+}
+
+function show_template_process( $template){
+    $tmp_records = cal_process( $template );
+    return sprintf( "未填寫: %.0f %%, 填寫中: %.0f %%, 已填寫: %.0f %%", $tmp_records[0], $tmp_records[1], $tmp_records[2] );
+}
 
 /* 顯示選單列 */
 function show_menu()
@@ -82,8 +111,13 @@ function status_menu( $status ){
     //return $html ;
 }
 
-function department_menu( $departments, $menu_name , $menu_class , $selected_id =NULL ){
-    $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
+function department_menu( $departments, $menu_name , $menu_class , $menu_id=NULL , $selected_id =NULL ){
+    if( is_null( $menu_id) ){
+       $html = "<select class='{$menu_class}' name='". $menu_name ."'>"; 
+    }else{
+        $html ="<select class='{$menu_class}' id='{$menu_id}' name='". $menu_name ."'>";
+    }
+
     $html .= "<option value='-1'>-------</option>";
     foreach( $departments as $department ){
         $is_selected = "";

@@ -169,7 +169,6 @@ class Template_model extends CI_Model
         $i =0;
         foreach( $section_ids as $section_id ){
             $section = $this->db->get_where( $this->default_section_table,array("section_id"=>$section_id ))->row();
-            //print_r( $section );
 
             //$tmp = new MY_Section( $section->section_id , $section->section_title, $i );
             //$tmp = new MY_Section( NULL , $section->section_title, $i );
@@ -218,7 +217,21 @@ class Template_model extends CI_Model
         return $retTemplateArray;
     }
 
-    public function get($template_id ){
+    public function get( $template_id ){
+        //get template
+        $ret_template = $this->db->get_where( "templates", array("template_id"=>$template_id))->row();
+        $sections = $this->db->from("sections")->where("template_id", $template_id)->order_by("section_order", 'asc')->get()->result();
+        $ret_template->sections = $sections ; 
+        foreach( $ret_template->sections as $section ){
+            $questions = $this->db->from('questions')->where('section_id', $section->section_id)->order_by("question_order",'asc')->get()->result();
+            $section->questions = $questions ; 
+        }
+        $questionnaires = $this->questionnaire_model->get_by_template_id( $template_id);
+        $ret_template->questionnaires = $questionnaires; 
+        return $ret_template;
+    }
+
+    public function get_2($template_id ){
         /*
         $this->db->from($this->template_table)
                  ->join($this->template_section_table, "{$this->template_section_table}.template_id = {$this->template_table}.template_id")
@@ -265,6 +278,7 @@ class Template_model extends CI_Model
                 $tmp_section->section_id = $rq->section_id ;
                 $tmp_section->section_title = $rq->section_title ;
                 $tmp_section->section_order = $rq->section_order ;
+                $tmp_section->is_all_comment = $rq->is_all_comment;
                 $tmp_section->template_id = $rq->template_id ; 
 
                 $retTemplateObj->sections[] = $tmp_section; 
