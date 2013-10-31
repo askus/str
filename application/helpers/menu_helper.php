@@ -1,5 +1,18 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+function year_menu( $years, $selected_year, $menu_name ,$menu_class, $menu_id){
+    $html = "<select class='{$menu_class}' name='{$menu_name}' id= '{$menu_id}' >";
+    $html .= "<option value='0'>-------</option>";
+
+    foreach( $years as $year ){
+        $is_selected = "";
+        if( $year == $selected_year ){ $is_selected ="selected";}
+        $html .= "<option value='{$year}' {$is_selected}>{$year}</option>";
+    }
+    $html .= "</select>";
+    return $html ;
+}
+
 function user_menu( $users, $menu_name, $menu_class, $menu_id, $selected_id= NULL ){
 
     $html = "<select class='{$menu_class}' name='". $menu_name ."' id='${menu_id}'>"; 

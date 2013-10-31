@@ -205,8 +205,28 @@ class Template_model extends CI_Model
         return $retTemplateObj; 
     }
 
-    public function get_all(){
-        $query = $this->db->from( $this->template_table )->order_by('template_id','desc');
+    public function get_years( ){
+        $q = $this->db->distinct()->select('year')->from('templates')->order_by('year','desc');
+        $tmp_results = $q->get()->result();
+        $ret_years = array();
+        foreach( $tmp_results as $tmp_result ){
+            $ret_years[] = $tmp_result->year;
+        }
+        return $ret_years;
+    }
+
+    public function get_by_year( $year ){
+        $query = $this->db->from( $this->template_table )->where('year', $year)->order_by('template_id','desc');
+        $tmp_templates = $query->get()->result();
+        $retTemplateArray= array();
+        foreach( $tmp_templates as $tmp_template ){
+            $retTemplateArray[] = $this->get( $tmp_template->template_id );
+        }
+        return $retTemplateArray ;
+    }
+
+    public function get_all($max_limit=  100){
+        $query = $this->db->from( $this->template_table )->order_by('template_id','desc')->limit( $max_limit);
         $tmp_templates  =  $query->get()->result();
 
         //print_r( $tmp_templates );

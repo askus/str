@@ -17,6 +17,12 @@ class Questionnaire_model extends CI_Model
 		$this->load->helper( 'form');
 
 	}
+
+	public function get_years( ){
+		$q = $this->db->distinct()->select('year')->from('questionnaires')->order_by('year','desc');
+		return $q->result();
+	}
+
 	public function delete_by_template_id( $template_id ){
 		$questionnaires = $this->get_by_template_id( $template_id );
 

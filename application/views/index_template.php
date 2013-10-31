@@ -8,6 +8,12 @@
   <div class="row-fluid">
     <h3><a href="<?=base_url('template')?>">評分表管理</a> / 檢視評分表</h3>
   </div>
+  <div class="row-fluid">
+    <form action="<?= base_url('template')?>" method="post" class="form-inline">
+      查詢年分：<?= year_menu( $years, $selected_year, 'selected_year' , 'span1', "selected-year") ?> <input class="btn btn-search" value="查詢" type="submit"></input>
+    </form>
+  </div>
+
   <?php foreach( $templates as $template ) : ?>
   	<div id="template-<?= $template->template_id ?>">
   		<h4>
@@ -19,7 +25,7 @@
         (<?= show_template_completenness($template) ?>)
       </h4>
   		<table id="template-<?= $template->template_id?>-table" class="table" style="display:none;">
-  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">被稽核單位</th><th>最近更新時間</th><th>修改人</th><th class="span4"></th></tr>
+  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">受測單位</th><th>最近更新時間</th><th>修改人</th><th class="span4"></th></tr>
   		<?php foreach( $template->questionnaires as $questionnaire ): ?>
   			<tr id="questionnaire-<?= $questionnaire->questionnaire_id ?>">
   				<td> <?= status_menu( $questionnaire->status ) ?></td>
@@ -28,7 +34,7 @@
           <td> <?php if( !is_null($questionnaire->last_modified_datetime) ): ?> <?= $questionnaire->last_modified_datetime ?> <?php endif;?> </td>
           <td> <?php if( !is_null( $questionnaire->last_modified_user ) ): ?> <?= $questionnaire->last_modified_user->name ?> <?php endif;?> </td>
   				<td> <a class="btn btn-mini btn-info" href="<?= base_url('questionnaire/view/'.$questionnaire->questionnaire_id ) ?>" >檢視</a> 
-               <a href="<?= base_url('questionnaire/edit' ) ?>/<?= $questionnaire->questionnaire_id ?>" class="btn btn-mini btn-info btn-edit">編輯</a> 
+               <a href="<?= base_url('questionnaire/edit' ) ?>/<?= $questionnaire->questionnaire_id ?>" class="btn btn-mini btn-info btn-edit">填寫</a> 
                <a class="btn btn-mini btn-danger questionnaire-del" data-questionnaire-id="<?= $questionnaire->questionnaire_id ?>" data-questionnaire-title="<?=$questionnaire->assigned_user->name?>的<?=$template->year?>年<?=$template->month?>月份<?=$template->title?>" >刪除</a> 
           </td>	
  			</tr>	
@@ -36,7 +42,7 @@
       <tr id="template-<?= $template->template_id?>-new-assigned" class="info" style="display:none;" >
         <td colspan="6">
           稽核負責人：<?= user_menu( $users, "new_assigned_user_id", "new-assigned-user-id", "new-assigned-user-id-".$template->template_id ) ?>
-          被稽核單位：<?= department_menu( $departments, "new_target_department_id" , "new-target-department-id", "new-target-department-id-".$template->template_id ) ?>
+          受測單位：<?= department_menu( $departments, "new_target_department_id" , "new-target-department-id", "new-target-department-id-".$template->template_id ) ?>
           <button name="add_new_questionnaire" class="btn btn-mini btn-primary btn-add-new-questionnaire" data-template-id="<?= $template->template_id ?>">新增</button>  
           <button name="reset" class="btn btn-mini btn-reset" data-template-id="<?= $template->template_id?>">取消</button>
         </td>
@@ -53,7 +59,9 @@
 <script src="js/bootstrap.min.js"></script>
 
 <script>
-
+  var selected_year = <?= $selected_year ?>;
+  var selected_template_id = <?= $selected_template_id ?>;
+  
   function add_labor_division( template_id, assigned_user_id, target_department_id  ){
     $.post( "<?= base_url('questionnaire/ajax_add') ?>", 
       {template_id: template_id, assigned_user_id: assigned_user_id, target_department_id: target_department_id },
@@ -61,7 +69,7 @@
         var res= $.parseJSON(data );
         if( res.status =="ok"){
           alert('新增成功');
-          location.href = "<?=base_url('template')?>"+"/?tid="+template_id;
+          location.href = "<?=base_url('template/index')?>"+"/"+selected_year+"/"+template_id;
         }else{
           alert('新增失敗');
         }
@@ -105,8 +113,13 @@
   $(function() {
 
 
-    drop_down_template( <?= $selected_template_id?> );
+    drop_down_template( selected_template_id );
 
+    $("input.btn-search").click( function( e) {
+      e.preventDefault();
+      selected_year = $("#selected-year").val();
+      location.href= "<?= base_url('template/index')?>/"+selected_year+"/"+selected_template_id;
+    });
 
     $("button.btn-add-new-questionnaire").click( function( e){
       var template_id = $(this).attr('data-template-id');

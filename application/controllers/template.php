@@ -14,16 +14,24 @@ class Template extends CI_Controller
         $this->load->model('department_model');
         $this->load->helper('menu_helper');
     }
-    public function index( ){
+    public function index( $selected_year = 0,  $selected_template_id = 0 ){
         check_permission($this->controller, 'view');
         $data = array();
         $users = $this->user_model->get_users_by_role_id(2);
         $departments = $this->user_model->get_department_list();
 
-        $selected_template_id= $this->input->get("tid");
+        //$selected_template_id= $this->input->get("tid");
 
+
+        if( $selected_year== 0){
+            $data['templates'] = $this->template_model->get_all();
+        }else{
+            $data['templates'] = $this->template_model->get_by_year( $selected_year);
+        }
+        $data['selected_year'] = $selected_year ;
         $data['selected_template_id']=$selected_template_id;
-        $data['templates'] = $this->template_model->get_all();
+       // $data['selected_template_id'] = $selected_template_id;
+        $data['years'] = $this->template_model->get_years();
         $data['users'] = $users;
         $data['departments'] = $departments;
         $this->layout->view( 'index_template', $data );
