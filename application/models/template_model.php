@@ -226,7 +226,7 @@ class Template_model extends CI_Model
     }
 
     public function get_all($max_limit=  100){
-        $query = $this->db->from( $this->template_table )->order_by('template_id','desc')->limit( $max_limit);
+        $query = $this->db->from( $this->template_table )->order_by('year desc, month desc')->limit( $max_limit);
         $tmp_templates  =  $query->get()->result();
 
         //print_r( $tmp_templates );

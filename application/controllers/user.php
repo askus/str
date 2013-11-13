@@ -41,7 +41,7 @@ class User extends CI_Controller
 
         $user = $this->input->post('user', true);
 
-        if (empty($user['uid'])) { // 新增
+        if (empty($user['user_id'])) { // 新增
             if ($this->user_model->isExist($user['account'])) {
                 echo 'exist';
             }

@@ -36,3 +36,9 @@ function months(){
 	}
 	return $month_array;
 }
+
+function trim_sec( $datetime ){
+	$tmp_datetime_array = explode( ":", $datetime );
+	unset( $tmp_datetime_array[ count($tmp_datetime_array)-1 ]);
+	return implode( ":", $tmp_datetime_array);
+}

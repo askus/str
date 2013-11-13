@@ -12,7 +12,7 @@
   <form class="form-inline" action="questionnaire/complete" id="questionnaire-update-form" method="post">
     <input type="hidden" name="questionnaire[questionnaire_id]" value="<?=$questionnaire->questionnaire_id ?>"></input>
     <input type="hidden" name="questionnaire[template_id]" value="<?= $questionnaire->template_id?> "></input>
-    <input type="hidden" name="questionnaire[date]" value="<?= $questionnaire->date?>" ></input>
+    <!-- <input type="hidden" name="questionnaire[date]" value="<?= $questionnaire->date?>" ></input> -->
     <input type="hidden" name="questionnaire[target_department_id]" value="<?= $questionnaire->target_department_id?>"></input>
     <input type="hidden" name="questionnaire[last_modified_user_id]" value="<?= $last_modified_user_id?>"></input>
     <div>
@@ -23,10 +23,28 @@
 
 
       <h4> <?= $questionnaire->year ?>年<?= $questionnaire->month ?>月份<?= $questionnaire->title ?> </h4>
-      <p>負責人：<?= $questionnaire->assigned_user->name ?></p>
-      <p>被稽核單位：<?= $questionnaire->target_department->department_name ?></p>
-      <p>稽核人：<input type="text" name="questionnaire[executor]" value="<?= $questionnaire->executor?>" class="span2"></input></p>
-
+      <ul>
+      <li><p><strong>負責人</strong>：<?= $questionnaire->assigned_user->name ?></p></li>
+      <li><p><strong>被稽核單位</strong>：<?= $questionnaire->target_department->department_name ?></p></li>
+      <li><p><strong>稽核人</strong>：<input type="text" name="questionnaire[executor]" value="<?= $questionnaire->executor?>" class="span2"></input> </p></li>
+      <li> <p>
+       <strong>稽核時間</strong>：
+        <span  class= "datetimepicker1 input-append date">
+         <input data-format="yyyy-dd-MM hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
+          <span class="add-on">
+            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+          </span>
+        </span>
+        ～
+        <span class="datetimepicker1 input-append date">
+         <input data-format="yyyy-dd-MM hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
+          <span class="add-on">
+            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+          </span>
+        </span>
+        </p>
+      </li>
+      </ul>
       <ul>
       <?php $i=0; ?>
         <?php foreach( $questionnaire->sections as $section ): ?> 
@@ -82,10 +100,16 @@
 
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/bootstrap-datetimepicker.min.js"></script>
+<script src="js/bootstrap-datetimepicker.zh-TW.js"></script>
 
 <script>
 
-
+   $(function() {
+    $('.datetimepicker1').datetimepicker({
+      language: 'zh-TW'
+    });
+  });
 
 
   $('.tmp-save-btn').click( function(){

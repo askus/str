@@ -18,10 +18,6 @@ class Questionnaire_model extends CI_Model
 
 	}
 
-	public function get_years( ){
-		$q = $this->db->distinct()->select('year')->from('questionnaires')->order_by('year','desc');
-		return $q->result();
-	}
 
 	public function delete_by_template_id( $template_id ){
 		$questionnaires = $this->get_by_template_id( $template_id );
@@ -41,7 +37,9 @@ class Questionnaire_model extends CI_Model
 		$questionnaire = $this->get_with_question_score( $questionnaire_form['questionnaire_id']);
 
 		$questionnaire->template_id = $questionnaire_form['template_id'];
-		$questionnaire->date = $questionnaire_form['date'];
+		//$questionnaire->date = $questionnaire_form['date'];
+		$questionnaire->from_date = $questionnaire_form['from_date'];
+		$questionnaire->to_date = $questionnaire_form['to_date'];
 		$questionnaire->target_department_id = $questionnaire_form['target_department_id'];
 		$questionnaire->last_modified_user_id = $questionnaire_form['last_modified_user_id'];
 		$questionnaire->executor = $questionnaire_form['executor'];
@@ -147,7 +145,8 @@ class Questionnaire_model extends CI_Model
 	public function update( $questionnaire ){
 		$data = array( 
 					'template_id'=> $questionnaire->template_id,
-					'date' => $questionnaire->date,
+					'from_date' => $questionnaire->from_date,
+					'to_date' => $questionnaire->to_date, 
 					'target_department_id' => $questionnaire->target_department_id,
 					'executor' => $questionnaire->executor , 
 					'assigned_user_id' => $questionnaire->assigned_user_id,

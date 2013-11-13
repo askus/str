@@ -101,6 +101,7 @@ class Questionnaire extends CI_Controller
     public function view( $questionnaire_id ){
         check_permission( $this->controller, 'view');
         $questionnaire = $this->questionnaire_model->get_with_question_score( $questionnaire_id );
+        
         $data['questionnaire'] = $questionnaire ;
         $this->layout->view('view_questionnaire', $data );
 
@@ -109,8 +110,11 @@ class Questionnaire extends CI_Controller
 
     public function edit( $questionnaire_id ){
     	check_permission($this->controller, 'edit');
+        $data['css']= array('bootstrap-datetimepicker.min.css');
+
     	// check is the assinged user 
     	$questionnaire = $this->questionnaire_model->get_with_question_score( $questionnaire_id );
+
 
 		// if login_user == administrator or the assigned user   
     	if( $this->check_user_id_for_edit_permission( $questionnaire->assigned_user->user_id ) ){
