@@ -125,6 +125,7 @@ class Template_model extends CI_Model
             $section->section_title = $sections_form['section_title'][$i];
             $section->section_order = $sections_form['section_order'][$i];  
             $section->is_all_comment = $sections_form['is_all_comment'][$i];
+            $section->is_analyzed = $sections_form['is_analyzed'][$i];
             $section->template_id = $template->template_id ;
 
             $template->sections[] = $section ;         
@@ -160,7 +161,22 @@ class Template_model extends CI_Model
         return $template; 
     }
 
+
+    /*public function get_default_template(){
+        $retTemplateObj = new stdClass();
+        $retTemplateObj->title = '服務稽核評分表';
+        $retTemplateObj->user_id = $this->session->userdata('user_id');
+        $sections = $this->db->from( $this->default_section_table)->order_by("section_order")->get()->result();
+        $retTemplateObj->sections = $sections ;
+        foreach( $sections as $section ){
+            $questions = $this->db->from( $this->default_question_table)->order_by("question_order")->get()->result();
+            $section->questions = $questions ;
+        }
+        return $retTemplateObj;
+    }*/
+
     public function get_default_template(){
+        
         $retTemplateObj = new My_Template();
         $retTemplateObj->title= '服務稽核評分表' ;
         $retTemplateObj->user_id = $this->session->userdata('user_id');
@@ -174,7 +190,8 @@ class Template_model extends CI_Model
             //$tmp = new MY_Section( NULL , $section->section_title, $i );
             $tmp = new MY_Section();
             $tmp->section_title = $section->section_title;
-            $tmp->section_order= $i     ; 
+            $tmp->section_order = $i     ; 
+            $tmp->is_analyzed = $section->is_analyzed; 
 
             $question_order= 1;
             if( $section_id < 6){
@@ -376,7 +393,8 @@ class Template_model extends CI_Model
             "section_title" => $section->section_title ,
             "section_order" => $section->section_order,
             "template_id" => $section->template_id,
-            "is_all_comment" => $section->is_all_comment
+            "is_all_comment" => $section->is_all_comment,
+            "is_analyzed" => $section->is_analyzed
         );
         // insert section bsaic information 
         $this->db->trans_start();

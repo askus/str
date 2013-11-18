@@ -82,7 +82,7 @@ class Questionnaire_model extends CI_Model
 
 	// create new questionnaire by 
 	public function add_by_labor_division( $template_id, $assigned_user_id, $target_department_id ){
-		$questionnaire_id = $this->add( 0, $template_id, $assigned_user_id, $target_department_id, date("Y-m-d H:i:s", now()) ,"", date("Y-m-d H:i:s", now()), null);
+		$questionnaire_id = $this->add( 0, $template_id, $assigned_user_id, $target_department_id, date("Y-m-d H:i:s", now()),date("Y-m-d H:i:s", now()) ,"", date("Y-m-d H:i:s", now()), null);
 		
 		$this->load->model("template_model");
 		$template = $this->template_model->get( $template_id );
@@ -177,13 +177,14 @@ class Questionnaire_model extends CI_Model
 
 	//public function add_score( $question) 
 
-	public function add( $status,  $template_id, $assined_user_id, $target_department_id, $date, $executor, $last_modified_datetime, $last_modified_user_id ){
+	public function add( $status,  $template_id, $assined_user_id, $target_department_id, $from_date, $to_date, $executor, $last_modified_datetime, $last_modified_user_id ){
 		$data = array(
 			'status' => $status, 
 			'template_id' => $template_id,
 			'assigned_user_id' => $assined_user_id,
 			'target_department_id' => $target_department_id,
-			'date' => $date, 
+			'from_date' => $from_date,
+			'to_date' => $to_date, 
 			'executor' => $executor ,
 			'last_modified_datetime' => $last_modified_datetime,
 			'last_modified_user_id' => $last_modified_user_id

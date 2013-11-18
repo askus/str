@@ -64,5 +64,12 @@ $config['permission'] = array(
         'add'    => 1,
         'edit'   => 3,
         'delete' => 1
+    ),
+    'analysis' => array(
+        'view'  => 1,
+        'add'   => 1,
+        'edit'  => 1,
+        'delete' => 1
     )
+
 );

@@ -50,6 +50,7 @@ class User_model extends CI_Model
     public function get($user_id)
     {
         $data = $this->db->get_where($this->user_table, array('user_id' => $user_id))->row();
+        
 
         return $data;
     }
