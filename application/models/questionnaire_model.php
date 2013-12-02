@@ -59,6 +59,7 @@ class Questionnaire_model extends CI_Model
 			$true_false_null = $questionnaire_score_form['true_false_null'][$i];
 			if( $true_false_null <0 ){
 				$is_null= true;
+				$score = null;
 			}else if( $true_false_null == 0 ){
 				$is_null= false; 
 				$score = 0;

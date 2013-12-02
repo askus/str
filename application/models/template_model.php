@@ -176,6 +176,20 @@ class Template_model extends CI_Model
     }*/
 
     public function get_default_template(){
+        $defaultTemplateObj = new stdClass();
+        $defaultTemplateObj->title = '服務稽核評分表';
+        $defaultTemplateObj->user_id = $this->session->userdata('user_id');
+        $defaultTemplateObj->sections = array();
+        for( $section_id = 1; $section_id <= 8; $section_id++ ){
+            $section = $this->db->get_where( $this->default_section_table, array("section_id"=>$section_id ))->row();
+            $questions = $this->db->get_where( $this->default_question_table, array("section_id"=>$section_id))->result();
+            $section->questions = $questions ; 
+            $defaultTemplateObj->sections[] = $section;
+        }
+        return $defaultTemplateObj;
+    }
+
+    public function get_default_template_2(){
         
         $retTemplateObj = new My_Template();
         $retTemplateObj->title= '服務稽核評分表' ;

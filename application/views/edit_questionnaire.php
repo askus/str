@@ -30,14 +30,14 @@
       <li> <p>
        <strong>稽核時間</strong>：
         <span  class= "datetimepicker1 input-append date">
-         <input data-format="yyyy-dd-MM hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
+         <input data-format="yyyy-MM-dd hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
           <span class="add-on">
             <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
           </span>
         </span>
         ～
         <span class="datetimepicker1 input-append date">
-         <input data-format="yyyy-dd-MM hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
+         <input data-format="yyyy-MM-dd hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
           <span class="add-on">
             <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
           </span>
@@ -51,13 +51,15 @@
           <li><strong><?= $section->section_title ?></strong></li>
           <table class="table">
           <?php if( !$section->is_all_comment ) { ?>
-            <tr><th></th><th>問題</th><th>評語</th></tr>
+            <tr><th></th><th></th><th>問題</th><th>評語</th></tr>
+              <?php  $q_od = 1; ?> 
               <?php foreach( $section->questions as $question ) : ?>
                   <tr>
                     <input type="hidden" name="questionnaire_score[question_id][]" value="<?= $question->question_id?>"></input>
-                   
+                    
                     <!-- <td class="span1"><input row='<?= $i ?>' class="is_not_null_checkbox" value="1" type="checkbox" name="questionnaire_score[is_not_null][]" <?php if( !$question->score->is_null): ?> checked<?php endif;?> ></input></td> -->
-                    <td class="span1"><?= true_false_null('questionnaire_score[true_false_null][]', $question->score, $i ) ?></td>
+                    <td class="span1">  <?= true_false_null('questionnaire_score[true_false_null][]', $question->score, $i ) ?></td>
+                    <td><?= $q_od++ ?> </td>
                     <td class="span7"><p id='row-<?= $i ?>-question'><?= $question->question_title?></p></td>
                     <!-- <td class="span1"><?php if( $question->has_score){ ?><input id="row-<?= $i ?>-score" type="text" class="span1" name="questionnaire_score[score][]" value="<?= $question->score->score ?>" <?php if($question->score->is_null): ?> readonly <?php endif;?>></input><?php }else{ ?> <input type="hidden" name="questionnaire_score[score][]" value='-1'><?php } ?>  </td> -->
                     <td class="span4"><?php if( $question->has_comment){ ?>
@@ -69,6 +71,7 @@
                     <input type="hidden" name="questionnaire_score[is_not_null][]" value='-1' >
                   </tr>
               <?php $i++; endforeach; ?>
+            
             <?php } else { ?>
               <tr><th></th><th></th></tr>
               <?php foreach( $section->questions as $question ): ?>
