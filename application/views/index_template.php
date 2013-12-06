@@ -26,7 +26,7 @@
         <a data-template-id="<?= $template->template_id ?>" data-template-title="<?=$template->year?>年<?=$template->month?>月份<?=$template->title?>"   class="template-del btn btn-mini btn-danger"> <i class="icon-trash icon-white"></i>刪除</a>
       </h4>
   		<table id="template-<?= $template->template_id?>-table" class="table" style="display:none;">
-  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">受測單位</th><th>最近更新時間</th><th>修改人</th><th class="span4"></th></tr>
+  		<tr><th class="span1">進度</th><th class="span1">負責人</th><th class="span2">受測單位</th><th class="span2">最近更新時間</th><th class="span1">修改人</th><th class="span4">操作</th></tr>
   		<?php foreach( $template->questionnaires as $questionnaire ): ?>
   			<tr id="questionnaire-<?= $questionnaire->questionnaire_id ?>">
   				<td> <?= status_menu( $questionnaire->status ) ?></td>

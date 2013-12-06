@@ -180,9 +180,12 @@ class Template_model extends CI_Model
         $defaultTemplateObj->title = '服務稽核評分表';
         $defaultTemplateObj->user_id = $this->session->userdata('user_id');
         $defaultTemplateObj->sections = array();
+        $defaultTemplateObj->template_id = null;
+        $defaultTemplateObj->year = date("Y");
+        $defaultTemplateObj->month = (((int)date("m")) -1 -1 + 12) %12 +1 ;
         for( $section_id = 1; $section_id <= 8; $section_id++ ){
-            $section = $this->db->get_where( $this->default_section_table, array("section_id"=>$section_id ))->row();
-            $questions = $this->db->get_where( $this->default_question_table, array("section_id"=>$section_id))->result();
+            $section = $this->db->order_by("section_order")->get_where( $this->default_section_table, array("section_id"=>$section_id ))->row();
+            $questions = $this->db->order_by("question_order")->get_where( $this->default_question_table, array("section_id"=>$section_id))->result();
             $section->questions = $questions ; 
             $defaultTemplateObj->sections[] = $section;
         }

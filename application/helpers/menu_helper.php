@@ -70,7 +70,7 @@ function show_menu()
         array("title"=>"帳號管理", "url"=>"user","role"=>1),
         array("title"=>"建立評分表", "url"=>"template/add", "role"=>1 ),
         array("title"=>"檢視評分表", "url"=>"template/index", "role"=>1),
-        array("title"=>"我的評分表", "url"=>"questionnaire/index", "role"=>3),
+        array("title"=>"填寫評分表", "url"=>"questionnaire/index", "role"=>3),
         array("title"=>"分析評分表", "url"=>"questionnaire/analyze", "role"=>1)
     );
 
@@ -111,11 +111,81 @@ function true_false_null( $select_name ,  $questionnaire_score, $row = null ){
 
     return $html;
 } 
+
+// radio array 
+function null_true_false( $radio_name, $questionnaire_score, $row_id  ){
+    $selected_option = 0;
+    if( $questionnaire_score->is_null ){
+        $selected_option = 0; // 0 = NULL
+    }else if( $questionnaire_score->score == 1 ){
+        $selected_option = 1; // 1 = O
+    }else if( $questionnaire_score->score == 0 ){
+        $selected_option = 2; // 2 = X
+    }
+    $option2values = array( array("<span class='muted'>無</span> ", -1), array("<span class='text-info'>Ｏ</span>",1), array( "<span class='text-error'>Ｘ </span>", 0 ));
+    
+    $html = "";
+    for( $i =0 ; $i <3 ; $i++){
+        if( $selected_option == $i ){ $is_selected = "checked";}else{ $is_selected = "";}
+        $html .= sprintf('<label class="radio inline"><input type="radio" data-row="%d" class="true_false_null" name="%s[%d]" value="%d" %s>%s</label><br>', 
+            $row_id,
+            $radio_name, 
+            $row_id, 
+            $option2values[$i][1],
+            $is_selected, 
+            $option2values[$i][0] ); 
+    }
+    return $html;
+}
+
+function score2class( $questionnaire_score ){
+    if( $questionnaire_score->is_null ){
+        return "null";
+    }else if($questionnaire_score->score == 1 ){
+        return "success";
+    }else{
+        return "error";
+    }
+}
+
 function score2symbol( $raw_score ){   
     $mapping= array( );
-    $mapping[0] ='x';
-    $mapping[1] = 'o';
+    $mapping[0] ='Ｘ';
+    $mapping[1] = 'Ｏ';
     return $mapping[$raw_score]; 
+}
+function cml_section_pos( $section ){
+    $pos_score =0;
+    foreach( $section->questions as $question  ){
+        if( !$question->score->is_null && $question->score->score == 1 ) $pos_score+=1;
+    }
+    return $pos_score; 
+}
+function cml_section_neg( $section ){
+    $pos_score =0;
+    foreach( $section->questions as $question  ){
+        if( !$question->score->is_null && $question->score->score == 0 ) $pos_score+=1;
+    }
+    return $pos_score;
+}
+function cml_section_score( $section){
+    $pos_score = cml_section_pos( $section );
+    $neg_score = cml_section_neg( $section );
+    if( $pos_score + $neg_score > 0 ){
+        return $pos_score/ ($pos_score+ $neg_score);
+    }
+    return null;
+}
+
+function cml_questionnaire_score( $questionnaire ){
+    $pos_score = 0;
+    $neg_score = 0;
+    foreach( $questionnaire->sections as $section ){
+        $pos_score += cml_section_pos($section);
+        $neg_score += cml_section_neg( $section );
+    }
+    if( $pos_score + $neg_score >0) return $pos_score/ ($pos_score+$neg_score );
+    return null;
 }
 
 function status_menu( $status ){

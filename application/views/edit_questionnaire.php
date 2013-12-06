@@ -12,7 +12,6 @@
   <form class="form-inline" action="questionnaire/complete" id="questionnaire-update-form" method="post">
     <input type="hidden" name="questionnaire[questionnaire_id]" value="<?=$questionnaire->questionnaire_id ?>"></input>
     <input type="hidden" name="questionnaire[template_id]" value="<?= $questionnaire->template_id?> "></input>
-    <!-- <input type="hidden" name="questionnaire[date]" value="<?= $questionnaire->date?>" ></input> -->
     <input type="hidden" name="questionnaire[target_department_id]" value="<?= $questionnaire->target_department_id?>"></input>
     <input type="hidden" name="questionnaire[last_modified_user_id]" value="<?= $last_modified_user_id?>"></input>
     <div>
@@ -26,18 +25,18 @@
       <ul>
       <li><p><strong>負責人</strong>：<?= $questionnaire->assigned_user->name ?></p></li>
       <li><p><strong>被稽核單位</strong>：<?= $questionnaire->target_department->department_name ?></p></li>
-      <li><p><strong>稽核人</strong>：<input type="text" name="questionnaire[executor]" value="<?= $questionnaire->executor?>" class="span2"></input> </p></li>
+      <li><p><strong>訪員姓名</strong>：<input type="text" name="questionnaire[executor]" id="questionnaire-executor" value="<?= $questionnaire->executor?>" class="span2"></input> </p></li>
       <li> <p>
        <strong>稽核時間</strong>：
         <span  class= "datetimepicker1 input-append date">
-         <input data-format="yyyy-MM-dd hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
+         <input id="questionnaire-from-date" data-format="yyyy-MM-dd hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
           <span class="add-on">
             <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
           </span>
         </span>
         ～
         <span class="datetimepicker1 input-append date">
-         <input data-format="yyyy-MM-dd hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
+         <input id="questionnaire-to-date" data-format="yyyy-MM-dd hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
           <span class="add-on">
             <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
           </span>
@@ -51,17 +50,15 @@
           <li><strong><?= $section->section_title ?></strong></li>
           <table class="table">
           <?php if( !$section->is_all_comment ) { ?>
-            <tr><th></th><th></th><th>問題</th><th>評語</th></tr>
+            <tr><th></th><th>編號</th><th>問題</th><th>評語</th></tr>
               <?php  $q_od = 1; ?> 
               <?php foreach( $section->questions as $question ) : ?>
-                  <tr>
+                  <tr id="row-<?= $i ?>-tr" class="<?= score2class( $question->score)?>">
                     <input type="hidden" name="questionnaire_score[question_id][]" value="<?= $question->question_id?>"></input>
                     
-                    <!-- <td class="span1"><input row='<?= $i ?>' class="is_not_null_checkbox" value="1" type="checkbox" name="questionnaire_score[is_not_null][]" <?php if( !$question->score->is_null): ?> checked<?php endif;?> ></input></td> -->
-                    <td class="span1">  <?= true_false_null('questionnaire_score[true_false_null][]', $question->score, $i ) ?></td>
-                    <td><?= $q_od++ ?> </td>
+                    <td class="span1">  <?= null_true_false('questionnaire_score[true_false_null]', $question->score, $i ) ?></td>
+                    <td id="row-<?= $i ?>-serial"><?= $q_od++ ?> </td>
                     <td class="span7"><p id='row-<?= $i ?>-question'><?= $question->question_title?></p></td>
-                    <!-- <td class="span1"><?php if( $question->has_score){ ?><input id="row-<?= $i ?>-score" type="text" class="span1" name="questionnaire_score[score][]" value="<?= $question->score->score ?>" <?php if($question->score->is_null): ?> readonly <?php endif;?>></input><?php }else{ ?> <input type="hidden" name="questionnaire_score[score][]" value='-1'><?php } ?>  </td> -->
                     <td class="span4"><?php if( $question->has_comment){ ?>
                                         <textarea id="row-<?= $i ?>-comment" type="text" class="span4" rows="3" name="questionnaire_score[comment][]"<?php if($question->score->is_null): ?>  readonly <?php endif;?> ><?= $question->score->comment?></textarea>
                                         <?php }else{ ?>
@@ -92,7 +89,7 @@
       </ul>
       <p>
         <button type="button" class="btn tmp-save-btn" data-loading-text="處理中..."> 暫時儲存</button>
-        <input type="submit"  class="btn btn-primary cmpl-btn" data-loading-text="處理中..." value="完成"></input>
+        <input type="submit" class="btn btn-primary cmpl-btn" data-loading-text="處理中..." value="完成"></button>
       </p>
     </div>
   </form>
@@ -115,6 +112,34 @@
   });
 
 
+  $(document).on('submit', '#questionnaire-update-form', function(e) {
+
+    var errMsg = new Array();
+
+    var executor = $("#questionnaire-executor").val();
+    if( $.trim( executor ) == ""){
+      errMsg.push("請填寫訪員姓名。");
+    }
+
+    var regExp = /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}$/;
+    var from_date = $("#questionnaire-from-date").val();
+    if( !from_date.match( regExp ) ){
+      errMsg.push("稽核開始時間格式錯誤。請照下列格式填寫：年-月-日 時:分");
+    }
+
+    var to_date = $("#questionnaire-to-date").val();
+    if( !to_date.match(regExp)) {
+      errMsg.push("稽核離開時間格式錯誤。請照下列格式填寫：年-月-日 時:分");
+    }
+
+    if( errMsg.length > 0){
+      $("#alert-msg").html( errMsg.join("<br>"));
+      $(".alert").hide().fadeIn(50);
+      e.preventDefault();
+    }
+
+  });
+
   $('.tmp-save-btn').click( function(){
     $.post( 'questionnaire/temp_save', $('#questionnaire-update-form').serialize(), function( data){
       ret  = $.parseJSON( data );
@@ -128,6 +153,7 @@
     });
   });
 
+  $
 
   $(document).ajaxStart(function() {
     $('.btn').button('loading');
@@ -137,21 +163,26 @@
 
   $(".true_false_null").change( function(){
     var row = $(this).attr('data-row');
-    var question = $('#row-'+row+'-question').html();
+    //var question = $('#row-'+row+'-question').html();
     var value = $(this).val();
     if( value == -1 ){
-      if( confirm("\""+question+"\"\n\n 即將清除評分與評語，您確定要放棄填答嗎？") ){
         $("#row-"+row+"-score").attr('readonly', true) ; 
         $("#row-"+row+"-comment").attr('readonly', true) ;
         $("#row-"+row+"-score").val('') ;
         $("#row-"+row+"-comment").val('');
-      }else{
-        $(this).val(1);
-      }
     }else{
       $("#row-"+row+"-score").attr('readonly', null) ;
       $("#row-"+row+"-comment").attr('readonly', null);
     }
+
+    if( value == 0){
+      $("#row-"+row+"-tr").attr("class", "error");
+    }else if( value ==1 ){
+      $("#row-"+row+"-tr").attr("class", "success");
+    }else{
+      $("#row-"+row+"-tr").attr("class", "null");
+    }
+
   });
 
       /*

@@ -17,7 +17,7 @@ class User_model extends CI_Model
         $this->db->from($this->user_table)
                  ->join($this->dep_table, "{$this->dep_table}.department_id = {$this->user_table}.department_id")
                  ->join($this->role_table, "{$this->role_table}.role_id = {$this->user_table}.role_id")
-                 ->order_by('user_id', 'asc');
+                 ->order_by('user_order', 'asc');
         $users = $this->db->get()->result();
         return $users;
     }
@@ -28,7 +28,7 @@ class User_model extends CI_Model
                  ->join($this->dep_table, "{$this->dep_table}.department_id = {$this->user_table}.department_id")
                  ->join($this->role_table, "{$this->role_table}.role_id = {$this->user_table}.role_id")
                  ->where( "{$this->user_table}.role_id", $role_id )
-                 ->order_by('user_id', 'asc');
+                 ->order_by('user_order', 'asc');
         $users = $this->db->get()->result();
         return $users; 
     }
