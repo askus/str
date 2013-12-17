@@ -26,28 +26,53 @@
       <li><p><strong>負責人</strong>：<?= $questionnaire->assigned_user->name ?></p></li>
       <li><p><strong>被稽核單位</strong>：<?= $questionnaire->target_department->department_name ?></p></li>
       <li><p><strong>訪員姓名</strong>：<input type="text" name="questionnaire[executor]" id="questionnaire-executor" value="<?= $questionnaire->executor?>" class="span2"></input> </p></li>
-      <li> <p>
+      <li>
        <strong>稽核時間</strong>：
-        <span  class= "datetimepicker1 input-append date">
-         <input id="questionnaire-from-date" data-format="yyyy-MM-dd hh:mm" name="questionnaire[from_date]" type="text" value="<?= trim_sec( $questionnaire->from_date) ?>"></input>
-          <span class="add-on">
-            <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
-          </span>
-        </span>
-        ～
+
+        <ul>
+          <li>
+            <p>
+            日期：<span  class= "datetimepicker1 input-append date">
+             <input id="questionnaire-from-date" class="span2" data-format="yyyy-MM-dd" name="questionnaire[from_date]" type="text" value="<?= date( "Y-m-d",strtotime($questionnaire->from_date))  ?>" ></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+              </span>
+            </span>
+            </p>
+          </li>
+          <li>
+            <p>
+            時間：<span class= "datetimepicker2 input-append date">
+             <input id="questionnaire-from-time" class="span1" data-format="hh:mm" name="questionnaire[from_time]" type="text" value="<?=  date( "H:i",strtotime($questionnaire->from_date)) ?>" ></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time"></i>
+              </span>
+            </span>
+            ～
+            <span  class= "datetimepicker2 input-append date">
+             <input id="questionnaire-to-time" class="span1" data-format="hh:mm" name="questionnaire[to_time]" type="text" value="<?=  date( "H:i",strtotime($questionnaire->to_date)) ?>" ></input>
+              <span class="add-on">
+                <i data-time-icon="icon-time"></i>
+              </span>
+            </span>
+            </p>
+          </li>
+        </ul>
+        <!--
         <span class="datetimepicker1 input-append date">
          <input id="questionnaire-to-date" data-format="yyyy-MM-dd hh:mm" name="questionnaire[to_date]" type="text" value="<?= trim_sec( $questionnaire->to_date ) ?>"></input>
           <span class="add-on">
             <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
           </span>
         </span>
-        </p>
+        -->
+        
       </li>
       </ul>
-      <ul>
-      <?php $i=0; ?>
+
+      <?php $i=0; $section_i =1; ?>
         <?php foreach( $questionnaire->sections as $section ): ?> 
-          <li><strong><?= $section->section_title ?></strong></li>
+          <p><strong><?= to_chinese_number(  $section_i ) ?>、<?= $section->section_title ?></strong></p>
           <table class="table">
           <?php if( !$section->is_all_comment ) { ?>
             <tr><th></th><th>編號</th><th>問題</th><th>評語</th></tr>
@@ -57,7 +82,7 @@
                     <input type="hidden" name="questionnaire_score[question_id][]" value="<?= $question->question_id?>"></input>
                     
                     <td class="span1">  <?= null_true_false('questionnaire_score[true_false_null]', $question->score, $i ) ?></td>
-                    <td id="row-<?= $i ?>-serial"><?= $q_od++ ?> </td>
+                    <td id="row-<?= $i ?>-serial"><?= to_chinese_number($section_i) ?>、<?= $q_od++ ?> </td>
                     <td class="span7"><p id='row-<?= $i ?>-question'><?= $question->question_title?></p></td>
                     <td class="span4"><?php if( $question->has_comment){ ?>
                                         <textarea id="row-<?= $i ?>-comment" type="text" class="span4" rows="3" name="questionnaire_score[comment][]"<?php if($question->score->is_null): ?>  readonly <?php endif;?> ><?= $question->score->comment?></textarea>
@@ -68,7 +93,6 @@
                     <input type="hidden" name="questionnaire_score[is_not_null][]" value='-1' >
                   </tr>
               <?php $i++; endforeach; ?>
-            
             <?php } else { ?>
               <tr><th></th><th></th></tr>
               <?php foreach( $section->questions as $question ): ?>
@@ -85,8 +109,9 @@
             <?php } ?>
             </table>
           </table>
+          <?php $section_i++; ?>
         <?php endforeach; ?> 
-      </ul>
+
       <p>
         <button type="button" class="btn tmp-save-btn" data-loading-text="處理中..."> 暫時儲存</button>
         <input type="submit" class="btn btn-primary cmpl-btn" data-loading-text="處理中..." value="完成"></button>
@@ -107,7 +132,13 @@
 
    $(function() {
     $('.datetimepicker1').datetimepicker({
-      language: 'zh-TW'
+      language: 'zh-TW',
+      pickTime: false,
+    });
+    $('.datetimepicker2').datetimepicker({
+      language: 'zh-TW',
+      pickDate: false,
+      pickSeconds: false
     });
   });
 
@@ -121,18 +152,31 @@
       errMsg.push("請填寫訪員姓名。");
     }
 
-    var regExp = /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}$/;
+    var date_reg = /^\d{4}-\d{1,2}-\d{1,2}$/;  
+    var time_reg = /^\d{1,2}:\d{1,2}$/;
+
     var from_date = $("#questionnaire-from-date").val();
-    if( !from_date.match( regExp ) ){
-      errMsg.push("稽核開始時間格式錯誤。請照下列格式填寫：年-月-日 時:分");
+    var from_time = $("#questionnaire-from-time").val();
+    var to_time = $("#questionnaire-to-time").val();
+
+
+  //   var regExp = /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}$/;
+  //  var from_date = $("#questionnaire-from-date").val();
+    if( !from_date.match( date_reg ) ){
+      errMsg.push("稽核日期格式錯誤。請照下列格式填寫：年-月-日");
     }
 
-    var to_date = $("#questionnaire-to-date").val();
-    if( !to_date.match(regExp)) {
-      errMsg.push("稽核離開時間格式錯誤。請照下列格式填寫：年-月-日 時:分");
+    if( !from_time.match( time_reg)){
+      errMsg.push("稽核開始時間格式錯誤。請照下列格式填寫：時:分");
     }
+    if( !to_time.match( time_reg)){
+      errMsg.push("稽核結束時間格式錯誤。請照下列格式填寫：時:分");
+    }
+
 
     if( errMsg.length > 0){
+      alert( errMsg.join("\n") );
+      $(window).scrollTop(0);
       $("#alert-msg").html( errMsg.join("<br>"));
       $(".alert").hide().fadeIn(50);
       e.preventDefault();

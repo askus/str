@@ -12,6 +12,9 @@
   <?php if (isset($css)) : foreach ($css as $cs) : ?>
   <link href="<?=base_url('css/'. $cs)?>" media="screen, projection" rel="stylesheet">
   <?php endforeach; endif; ?>
+  <?php if (isset($print_css)) : foreach ($print_css as $cs) : ?>
+  <link href="<?=base_url('css/'. $cs)?>" media="print" rel="stylesheet">
+  <?php endforeach; endif; ?>
 </head>
 
 <body>

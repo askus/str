@@ -5,9 +5,9 @@ class Questionnaire_model extends CI_Model
 /*
 	status: 0-> incomplete, 1-> processed, 2-> complete
 */
-	public $STATUS_INCOMPLETE= 0;
-	public $STATUS_PROCESSED = 1;
-	public $STATUS_COMPLETE = 2; 
+	const STATUS_INCOMPLETE= 0;
+	const STATUS_PROCESSED = 1;
+	const STATUS_COMPLETE = 2; 
 
 	public function __construct()
     {
@@ -38,8 +38,13 @@ class Questionnaire_model extends CI_Model
 
 		$questionnaire->template_id = $questionnaire_form['template_id'];
 		//$questionnaire->date = $questionnaire_form['date'];
-		$questionnaire->from_date = $questionnaire_form['from_date'];
-		$questionnaire->to_date = $questionnaire_form['to_date'];
+
+		//convert from_date, from_time, to_time to from_datetime and to_datetime  
+		$from_datetime = sprintf("%s %s:00",$questionnaire_form['from_date'], $questionnaire_form['from_time']);
+		$to_datetime = sprintf("%s %s:00", $questionnaire_form['from_date'], $questionnaire_form['to_time']);
+
+		$questionnaire->from_date = $from_datetime;
+		$questionnaire->to_date = $to_datetime;
 		$questionnaire->target_department_id = $questionnaire_form['target_department_id'];
 		$questionnaire->last_modified_user_id = $questionnaire_form['last_modified_user_id'];
 		$questionnaire->executor = $questionnaire_form['executor'];
@@ -129,7 +134,6 @@ class Questionnaire_model extends CI_Model
 
 	public function update_questionnaire_score( $questionnaire_score ){
 
-
 		$data = array( 'is_null' => $questionnaire_score->is_null,
 						'comment' => $questionnaire_score->comment,
 						'score' => $questionnaire_score->score  );
@@ -204,6 +208,7 @@ class Questionnaire_model extends CI_Model
 		}
 		return $ret_questionnaires;  
 	}
+
 	public function get( $questionnaire_id ){
 		$query = $this->db->get_where( "questionnaires", array("questionnaire_id"=> $questionnaire_id ));
 		$ret = $query->row();
@@ -249,6 +254,21 @@ class Questionnaire_model extends CI_Model
 	}
 	public function get_by_user_id( $user_id ){
 		$tmp_questionnaires = $this->db->get_where("questionnaires", array("assigned_user_id"=>$user_id))->result(); 
+		$ret_questionnaires = array();
+		foreach( $tmp_questionnaires as $tmp_questionnaire ){
+			$ret_questionnaires[] = $this->get_with_question_score( $tmp_questionnaire->questionnaire_id );
+		}
+		return $ret_questionnaires;
+	}
+	public function get_complete_by_target_department_id( $department_id){
+		return $this->get_by_target_department_id( $department_id, Questionnaire_model::STATUS_COMPLETE);
+	}
+	public function get_by_target_department_id( $department_id , $status = null ){
+		if( is_null( $status )){
+			$tmp_questionnaires = $this->db->order_by("questionnaire_id DESC")->get_where("questionnaires", array("target_department_id"=> $department_id ))->result();
+		}else{
+			$tmp_questionnaires = $this->db->order_by("questionnaire_id DESC")->get_where("questionnaires", array("target_department_id"=> $department_id , "status"=>$status) )->result();
+		}
 		$ret_questionnaires = array();
 		foreach( $tmp_questionnaires as $tmp_questionnaire ){
 			$ret_questionnaires[] = $this->get_with_question_score( $tmp_questionnaire->questionnaire_id );

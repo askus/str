@@ -60,7 +60,9 @@ $config['permission'] = array(
         'delete' => 1
     ),
     'questionnaire' => array(
-        'view'   => 3,
+        'view'  =>3 ,
+        'view_encrypted' => 3,
+        'my_department' =>3,
         'add'    => 1,
         'edit'   => 3,
         'delete' => 1

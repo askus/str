@@ -11,6 +11,7 @@ class Questionnaire extends CI_Controller
         $this->controller = strtolower(__CLASS__);
     	$this->load->model('questionnaire_model');
     	$this->load->model('template_model');
+        $this->load->model('department_model');
     }
 
     public function index(){
@@ -40,8 +41,21 @@ class Questionnaire extends CI_Controller
         echo' {"status":"ok", "errMsg":[] } ';
     }
 
-    public function check_user_id_for_edit_permission( $questionnaire_user_id ){
-        
+    public function check_department_id( $department_id ){
+        $login_user_department_id = $this->session->userdata('department_id');
+        return $department_id == $login_user_department_id; 
+    }
+
+    public function is_author( $questionnaire_user_id ){
+        $login_user_id = $this->session->userdata('user_id');
+        return $questionnaire_user_id == $login_user_id;
+    }
+    public function is_admin( ){
+        $login_user_role_id = $this->session->userdata('role_id');
+        return $login_user_role_id == 1 ;
+    }
+/*
+    public function check_author_id_or_admin_id( $questionnaire_user_id ){
         $login_user_role_id = $this->session->userdata('role_id');
         $login_user_id = $this->session->userdata('user_id');
         
@@ -53,7 +67,12 @@ class Questionnaire extends CI_Controller
             return false ; 
         }
     }
-
+*/
+    /*
+    public function check_user_id_for_edit_permission( $questionnaire_user_id ){
+        return check_author_id_or_admin_id( $questionnaire_user_id );
+    }
+*/
     public function complete(){
         check_permission( $this->controller, 'edit'); 
 
@@ -97,14 +116,34 @@ class Questionnaire extends CI_Controller
         }
     }
 
+    public function view_encrypted( $questionnaire_id ){
+        check_permission( $this->controller, 'view_encrypted');
+        $questionnaire = $this->questionnaire_model->get_with_question_score( $questionnaire_id );
+        
+        if(  $this->is_admin() || $this->check_department_id( $questionnaire->target_department_id ) ){
+            $data['questionnaire'] = $questionnaire ;
+            $data['is_encrypted'] = true; 
+            $data['css']= array('view-questionnaire.css');
+            $data['print_css'] = array('view-questionnaire.css');
+            $this->layout->view('view_questionnaire', $data );
+        }else{
+            redirect( base_url("questionnaire") );
+        }
+    }
 
     public function view( $questionnaire_id ){
         check_permission( $this->controller, 'view');
         $questionnaire = $this->questionnaire_model->get_with_question_score( $questionnaire_id );
         
-        $data['questionnaire'] = $questionnaire ;
-        $this->layout->view('view_questionnaire', $data );
-
+        if( $this->is_author( $questionnaire->assigned_user->user_id ) || $this->is_admin() ){
+            $data['questionnaire'] = $questionnaire ;
+            $data['is_encrypted'] = false; 
+            $data['css']= array('view-questionnaire.css');
+            $data['print_css'] = array('view-questionnaire.css');
+            $this->layout->view('view_questionnaire', $data );
+        }else{
+            redirect( base_url("questionnaire") );
+        }
     }
 
 
@@ -117,13 +156,24 @@ class Questionnaire extends CI_Controller
 
 
 		// if login_user == administrator or the assigned user   
-    	if( $this->check_user_id_for_edit_permission( $questionnaire->assigned_user->user_id ) ){
+    	if( $this->is_author( $questionnaire->assigned_user->user_id ) || $this->is_admin() ){
     		$data['questionnaire'] = $questionnaire;
     		$data['last_modified_user_id'] = $this->session->userdata('user_id');
             $this->layout->view( 'edit_questionnaire', $data );
     	}else{
     		redirect( base_url("questionnaire") );
     	}
+    }
+    public function my_department( ){
+        check_permission( $this->controller, 'my_department');
+
+        $my_department_id = $this->session->userdata('department_id');
+        $department = $this->department_model->get( $my_department_id);
+        $data = array();
+        $data['questionnaires'] = $this->questionnaire_model->get_complete_by_target_department_id( $my_department_id );
+        $data['department'] = $department ; 
+        $this->layout->view('my_department', $data );        
+
     }
 
 }

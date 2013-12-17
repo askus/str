@@ -1,5 +1,25 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+function month_menu( $selected_month, $menu_name, $menu_class, $menu_id ){
+    $html  = "<select class='{$menu_class}' name='{$menu_name}' id= '{$menu_id}' >";
+    $html .= "<option value='0'>-------</option>";
+
+
+}
+
+function chinese_year_menu( $years,  $selected_year, $menu_name, $menu_class, $menu_id  ){
+    $html = "<select class='{$menu_class}' name='{$menu_name}' id= '{$menu_id}' >";
+    $html .= "<option value='0'>-------</option>";
+
+    foreach( $years as $year ){
+        $is_selected = "";
+        if( $year == $selected_year ){ $is_selected ="selected";}
+        $html .= "<option value='{$year}' {$is_selected}>{$year}</option>";
+    }
+    $html .= "</select>";
+    return $html ;
+}
+
 function year_menu( $years, $selected_year, $menu_name ,$menu_class, $menu_id){
     $html = "<select class='{$menu_class}' name='{$menu_name}' id= '{$menu_id}' >";
     $html .= "<option value='0'>-------</option>";
@@ -70,8 +90,9 @@ function show_menu()
         array("title"=>"帳號管理", "url"=>"user","role"=>1),
         array("title"=>"建立評分表", "url"=>"template/add", "role"=>1 ),
         array("title"=>"檢視評分表", "url"=>"template/index", "role"=>1),
-        array("title"=>"填寫評分表", "url"=>"questionnaire/index", "role"=>3),
-        array("title"=>"分析評分表", "url"=>"questionnaire/analyze", "role"=>1)
+        array('title'=>"檢視本科室評分表", "url"=>"questionnaire/my_department", "role"=>3),
+        array("title"=>"填寫評分表", "url"=>"questionnaire/index", "role"=>3)
+
     );
 
     // 建構選單 HTML
@@ -176,13 +197,32 @@ function cml_section_score( $section){
     }
     return null;
 }
-
+function cml_questionnaire_pos( $questionnaire){
+    $pos_score= 0;
+    foreach( $questionnaire->sections as $section ){
+        if( $section->is_analyzed ){
+            $pos_score += cml_section_pos( $section );
+        }
+    }   
+    return $pos_score;
+}
+function cml_questionnaire_neg( $questionnaire){
+    $neg_score= 0;
+    foreach( $questionnaire->sections as $section ){
+        if( $section->is_analyzed ){
+            $neg_score += cml_section_neg( $section );
+        }
+    }
+    return $neg_score;
+}
 function cml_questionnaire_score( $questionnaire ){
     $pos_score = 0;
     $neg_score = 0;
     foreach( $questionnaire->sections as $section ){
-        $pos_score += cml_section_pos($section);
-        $neg_score += cml_section_neg( $section );
+        if( $section->is_analyzed){
+            $pos_score += cml_section_pos($section);
+            $neg_score += cml_section_neg( $section );
+        }
     }
     if( $pos_score + $neg_score >0) return $pos_score/ ($pos_score+$neg_score );
     return null;
@@ -210,3 +250,10 @@ function department_menu( $departments, $menu_name , $menu_class , $menu_id=NULL
     $html .= "</select>";
     return $html ;
 } 
+function to_chinese_number( $i ){
+    if( $i > 10){
+        return null;
+    }
+    $num_array = array( "零","一","二","三","四","五","六","七","八","九","十") ;
+    return $num_array[ $i ];
+}

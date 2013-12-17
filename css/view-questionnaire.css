@@ -1,0 +1,40 @@
+
+table.score_table{
+	border: 2px solid #000000; border-collapse: collapse;
+	text-align: center;
+	font-size: 9px;
+}
+
+table.score_table th,table.score_table tr,table.score_table td{
+	 border: 1px solid #000000;
+}
+
+table.detail_table {
+	width: 760px;
+	border-collapse: collapse;
+
+}
+
+table.detail_table, table.detail_table td, table.detail_table th {
+	font-size: 9px;
+	border: 1px solid #000000;
+}
+table.detail_table .center_td{
+	text-align: center;
+}
+
+.print_short{
+	width: 30px;
+}
+.print_medium{
+	width: 100px;
+}
+.print_large{
+	width: 600px;
+}
+
+@media print{
+	.no-print {
+		display:none;
+	}
+}
