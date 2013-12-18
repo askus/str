@@ -92,7 +92,6 @@ function show_menu()
         array("title"=>"檢視評分表", "url"=>"template/index", "role"=>1),
         array('title'=>"檢視本科室評分表", "url"=>"questionnaire/my_department", "role"=>3),
         array("title"=>"填寫評分表", "url"=>"questionnaire/index", "role"=>3)
-
     );
 
     // 建構選單 HTML

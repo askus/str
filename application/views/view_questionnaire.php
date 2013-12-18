@@ -12,7 +12,7 @@
       <div style="overflow: auto;">
         <div style="float:left; width:50%; font-size:9px;">
           <ul>
-            <li><strong>被稽核單位</strong>：<?= $questionnaire->target_department->department_name ?> </li>  
+            <li><strong>受稽核單位</strong>：<?= $questionnaire->target_department->department_name ?> </li>  
             <?php if(  !$is_encrypted  ): ?> 
               <li><strong>負責人</strong>：<?= $questionnaire->assigned_user->name ?> </li>
               <li><strong>訪員姓名</strong>：<?= $questionnaire->executor?> </li>

@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="row-fluid">
-    <h3>評分表 / 檢視本單位評分表</h3>
+    <h3>評分表管理 / 檢視本科室評分表</h3>
   </div>
   <table class="table">
   <tr><th>科室</th><th>年份</th><th>月份</th><th>標題</th><th></th></tr>

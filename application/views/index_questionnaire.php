@@ -18,7 +18,8 @@
 	  	<td>
 	  		<a href="<?= base_url('questionnaire/view/'.$questionnaire->questionnaire_id)?>" class="btn btn-mini btn-info">檢視</a>
 	  		<a href="<?= base_url('questionnaire/edit/'.$questionnaire->questionnaire_id)?>" class="btn btn-mini btn-info">填寫</a>
-	  	<td>
+        <a href="<?= base_url('template/view_blank/'.$questionnaire->template_id)?>" target="_blank" class="btn btn-mini btn-success">列印空白評分表</a>
+      <td>
   	</tr>
   <?php endforeach;?>
   </table>

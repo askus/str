@@ -59,6 +59,16 @@ class Template extends CI_Controller
         //redirect( base_url('template'));
     }
 
+    public function view_blank( $template_id ){
+        check_permission( $this->controller,'view_blank');
+        $template = $this->template_model->get( $template_id );
+        $data = array();
+        $data['template'] = $template ;
+        $data['css']= array('view-questionnaire.css');
+        $data['print_css'] = array('view-questionnaire.css');
+        $this->load->view( 'view_blank', $data );
+    }
+
     public function ajax_add(){
         check_permission($this->controller, 'add');
 
